@@ -30,7 +30,7 @@ RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 COPY package.json pnpm-lock.yaml ./
 
 # Instalar únicamente dependencias de producción
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # Copiar código compilado
 COPY --from=builder /app/dist ./dist
