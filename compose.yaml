@@ -1,0 +1,17 @@
+services:
+  backend:
+    build:
+      context: ./back-end
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '2' #Se topea para el uso de 200% pensando en que como minimo se ejecutara en un I3 o ryzen3 de 4 nucleos
+          memory: 512M #Dado la version inicial y que no se esta usando Java con Springboot se decide topear en 512MB de uso permitido de RAM
+    ports:
+      - ${PORT}:${PORT}
+    env_file:
+      - .env
