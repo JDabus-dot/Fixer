@@ -1,4 +1,2 @@
 packages:
   - 'back-end'
-allowBuilds:
-  esbuild: true

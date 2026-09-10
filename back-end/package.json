@@ -15,8 +15,7 @@
     "build": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "vitest run",
-    "prepare": "husky ../.husky"
+    "test": "vitest run"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
