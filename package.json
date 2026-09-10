@@ -2,13 +2,17 @@
   "name": "Fixer",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "24.21.0",
+    "pnpm": "12.3.4"
+  },
   "scripts": {
     "prepare": "husky"
   },
   "lint-staged": {
     "back-end/**/*.{ts,js}": "pnpm --filter back-end exec eslint --fix"
   },
-  "packageManager": "pnpm@9.12.0",
+  "packageManager": "pnpm@12.3.4",
   "type": "module",
   "devDependencies": {
       "husky": "9.1.7",
