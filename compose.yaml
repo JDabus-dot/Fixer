@@ -1,8 +1,8 @@
 services:
   backend:
     build:
-      context: ./back-end
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./back-end/Dockerfile
     environment:
       - NODE_ENV=production
     restart: always
