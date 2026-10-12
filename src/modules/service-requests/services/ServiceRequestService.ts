@@ -3,9 +3,11 @@ import { IProfessionalRepository } from '../../professionals/interfaces/IProfess
 import { BadRequestError, ForbiddenError, NotFoundError } from '../../../common/errors/index.js';
 import { CreateServiceRequestDTO, UpdateRequestStatusDTO } from '../dtos/ServiceRequestDTOs.js';
 import { ServiceRequestModel } from '../models/ServiceRequestModel.js';
+import { ServiceRequestFactory } from '../factories/ServiceRequestFactory.js';
 
 /**
  * Servicio POO para la lógica de negocio de órdenes de servicio y cotizaciones.
+ * Utiliza ServiceRequestFactory para desacoplar la creación de solicitudes estándar y de urgencia.
  */
 export class ServiceRequestService {
   private readonly requestRepository: IServiceRequestRepository;
@@ -29,19 +31,9 @@ export class ServiceRequestService {
       throw new BadRequestError('No podés solicitarte un servicio a vos mismo');
     }
 
-    return this.requestRepository.create({
-      clientId,
-      professionalId: dto.professionalId,
-      title: dto.title,
-      description: dto.description,
-      category: dto.category,
-      serviceAddress: dto.serviceAddress,
-      zone: dto.zone,
-      isUrgent: dto.isUrgent,
-      scheduledDate: dto.scheduledDate,
-      estimatedBudget: dto.estimatedBudget || professional.basePrice,
-      status: 'PENDING'
-    });
+    // Patrón Factory Method: Delega la construcción según si es estándar o de urgencia
+    const creator = ServiceRequestFactory.getCreator(dto.isUrgent);
+    return creator.create(this.requestRepository, clientId, dto, professional.basePrice);
   }
 
   public async getMyRequestsAsClient(clientId: string): Promise<ServiceRequestModel[]> {

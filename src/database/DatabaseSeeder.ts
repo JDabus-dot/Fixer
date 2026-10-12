@@ -3,6 +3,7 @@ import { ProfessionalProfileModel } from '../modules/professionals/models/Profes
 import { ReviewModel } from '../modules/reviews/models/ReviewModel.js';
 import { ServiceRequestModel } from '../modules/service-requests/models/ServiceRequestModel.js';
 import { PasswordHasher } from '../common/utils/PasswordHasher.js';
+import { ProfessionalProfileBuilder } from '../modules/professionals/builders/ProfessionalProfileBuilder.js';
 
 /**
  * Seeder POO para poblar la base de datos con datos realistas basados en los maquetados.
@@ -48,37 +49,29 @@ export class DatabaseSeeder {
 
     const carlosUserId = carlosUser.id || (carlosUser as any).getDataValue('id');
 
-    const carlosProfile = await ProfessionalProfileModel.create({
-      userId: carlosUserId,
-      tradeCategory: 'plomeria',
-      headline: 'Plomería Integral & Gasista Matriculado de 1ª Categoría',
-      bio: 'Técnico instalador matriculado con más de 14 años de oficio en obras residenciales, remodelaciones de categoría y consorcios en CABA y Zona Norte. Me especializo en intervenciones no invasivas de máxima precisión, empleando instrumental de detección acústica y termografía infrarroja para diagnosticar fallas sin roturas innecesarias. Cuento con instrumental homologado y compromiso estricto de puntualidad y limpieza en cada trabajo.',
-      licenseNumber: 'Matrícula Metrogas Nº 48.912',
-      experienceYears: 14,
-      city: 'Bahía Blanca',
-      zone: 'Palermo y Zona Norte',
-      address: 'San Martín 228, Bahía Blanca',
-      coverageRadiusKm: 25,
-      basePrice: 18500,
-      responseTime: '< 20 min',
-      isEmergencyAvailable: true,
-      isVerified: true,
-      badgeLevel: 'Fixer Diamond',
-      ratingAverage: 4.9,
-      totalReviews: 142,
-      fiveStarCount: 121,
-      fourStarCount: 17,
-      threeStarCount: 3,
-      twoStarCount: 1,
-      oneStarCount: 0,
-      specialties: [
+    // Construcción fluida y consistente mediante el Patrón BUILDER
+    const carlosProfile = await new ProfessionalProfileBuilder(carlosUserId)
+      .withTrade(
+        'plomeria',
+        'Plomería Integral & Gasista Matriculado de 1ª Categoría',
+        'Matrícula Metrogas Nº 48.912',
+        14
+      )
+      .withBio(
+        'Técnico instalador matriculado con más de 14 años de oficio en obras residenciales, remodelaciones de categoría y consorcios en CABA y Zona Norte. Me especializo en intervenciones no invasivas de máxima precisión, empleando instrumental de detección acústica y termografía infrarroja para diagnosticar fallas sin roturas innecesarias. Cuento con instrumental homologado y compromiso estricto de puntualidad y limpieza en cada trabajo.'
+      )
+      .withLocation('Bahía Blanca', 'Palermo y Zona Norte', 'San Martín 228, Bahía Blanca', 25)
+      .withPricing(18500, '< 20 min', true)
+      .withEmergencyAvailability('< 20 min')
+      .withReputation(4.9, 142, 'Fixer Diamond', 121, 17, 3, 1, 0)
+      .withSpecialties([
         'Detección térmica de pérdidas',
         'Termofusión y soldadura sanitaria',
         'Service integral de calderas duales',
         'Instalación de artefactos y griferías',
         'Planos de gas y habilitación oficial'
-      ]
-    });
+      ])
+      .build();
 
     // 2. Crear Clientes para reseñas y solicitudes
     const javierUser = await UserModel.create({
@@ -180,31 +173,15 @@ export class DatabaseSeeder {
       isActive: true
     });
 
-    await ProfessionalProfileModel.create({
-      userId: robertoUser.id || (robertoUser as any).getDataValue('id'),
-      tradeCategory: 'electricidad',
-      headline: 'Electricista Matriculado COPIME & Automatizaciones',
-      bio: 'Especialista en tableros eléctricos certificados, cableados ignífugos y detección de fugas a tierra.',
-      licenseNumber: 'Matrícula COPIME Nº 29.841',
-      experienceYears: 11,
-      city: 'CABA',
-      zone: 'Palermo y Belgrano',
-      address: 'Av. Cabildo 1420',
-      coverageRadiusKm: 20,
-      basePrice: 16000,
-      responseTime: '< 15 min',
-      isEmergencyAvailable: true,
-      isVerified: true,
-      badgeLevel: 'Fixer Pro',
-      ratingAverage: 4.8,
-      totalReviews: 89,
-      fiveStarCount: 75,
-      fourStarCount: 12,
-      threeStarCount: 2,
-      twoStarCount: 0,
-      oneStarCount: 0,
-      specialties: ['Tableros seccionales', 'Monofásica y Trifásica', 'Luces LED empotradas']
-    });
+    await new ProfessionalProfileBuilder(robertoUser.id || (robertoUser as any).getDataValue('id'))
+      .withTrade('electricidad', 'Electricista Matriculado COPIME & Automatizaciones', 'Matrícula COPIME Nº 29.841', 11)
+      .withBio('Especialista en tableros eléctricos certificados, cableados ignífugos y detección de fugas a tierra.')
+      .withLocation('CABA', 'Palermo y Belgrano', 'Av. Cabildo 1420', 20)
+      .withPricing(16000, '< 15 min', true)
+      .withEmergencyAvailability('< 15 min')
+      .withReputation(4.8, 89, 'Fixer Pro', 75, 12, 2, 0, 0)
+      .withSpecialties(['Tableros seccionales', 'Monofásica y Trifásica', 'Luces LED empotradas'])
+      .build();
 
     const marianaUser = await UserModel.create({
       fullName: 'Mariana Vázquez',
@@ -218,31 +195,14 @@ export class DatabaseSeeder {
       isActive: true
     });
 
-    await ProfessionalProfileModel.create({
-      userId: marianaUser.id || (marianaUser as any).getDataValue('id'),
-      tradeCategory: 'pintura',
-      headline: 'Pintura de Obra, Interiores & Acabados de Alta Calidad',
-      bio: 'Pintura látex lavable, esmaltes sintéticos, enduido completo e impermeabilización de terrazas.',
-      licenseNumber: 'Certificación Profesional Fixer 2024',
-      experienceYears: 8,
-      city: 'CABA',
-      zone: 'Recoleta y Caballito',
-      address: 'Av. Santa Fe 3200',
-      coverageRadiusKm: 15,
-      basePrice: 14000,
-      responseTime: '< 45 min',
-      isEmergencyAvailable: false,
-      isVerified: true,
-      badgeLevel: 'Fixer Verified',
-      ratingAverage: 4.9,
-      totalReviews: 64,
-      fiveStarCount: 58,
-      fourStarCount: 5,
-      threeStarCount: 1,
-      twoStarCount: 0,
-      oneStarCount: 0,
-      specialties: ['Pintura interior', 'Microcemento alisado', 'Impermeabilización']
-    });
+    await new ProfessionalProfileBuilder(marianaUser.id || (marianaUser as any).getDataValue('id'))
+      .withTrade('pintura', 'Pintura de Obra, Interiores & Acabados de Alta Calidad', 'Certificación Profesional Fixer 2024', 8)
+      .withBio('Pintura látex lavable, esmaltes sintéticos, enduido completo e impermeabilización de terrazas.')
+      .withLocation('CABA', 'Recoleta y Caballito', 'Av. Santa Fe 3200', 15)
+      .withPricing(14000, '< 45 min', false)
+      .withReputation(4.9, 64, 'Fixer Verified', 58, 5, 1, 0, 0)
+      .withSpecialties(['Pintura interior', 'Microcemento alisado', 'Impermeabilización'])
+      .build();
 
     // 5. Crear Solicitud de Servicio de Ejemplo
     await ServiceRequestModel.create({
