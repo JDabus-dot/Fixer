@@ -21,7 +21,6 @@ export interface IReviewBreakdown {
 export class ProfessionalProfileBuilder {
   private profileData: Partial<IProfessionalProfileAttributes> = {
     coverageRadiusKm: 15,
-    basePrice: 10000,
     responseTime: '< 30 min',
     isEmergencyAvailable: false,
     isVerified: false,
@@ -81,14 +80,8 @@ export class ProfessionalProfileBuilder {
     return this;
   }
 
-  public withPricing(
-    basePrice: number,
-    responseTime = '< 30 min',
-    isEmergencyAvailable = false
-  ): this {
-    this.profileData.basePrice = basePrice;
+  public withResponseTime(responseTime = '< 30 min'): this {
     this.profileData.responseTime = responseTime;
-    this.profileData.isEmergencyAvailable = isEmergencyAvailable;
     return this;
   }
 

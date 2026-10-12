@@ -11,17 +11,15 @@ import { IServiceRequestRepository } from '../interfaces/IServiceRequestReposito
 export abstract class ServiceRequestCreator {
   public abstract buildCreationAttributes(
     clientId: string,
-    dto: CreateServiceRequestDTO,
-    basePrice: number
+    dto: CreateServiceRequestDTO
   ): IServiceRequestCreationAttributes;
 
   public async create(
     repository: IServiceRequestRepository,
     clientId: string,
-    dto: CreateServiceRequestDTO,
-    basePrice: number
+    dto: CreateServiceRequestDTO
   ): Promise<ServiceRequestModel> {
-    const attributes = this.buildCreationAttributes(clientId, dto, basePrice);
+    const attributes = this.buildCreationAttributes(clientId, dto);
     return repository.create(attributes);
   }
 }
@@ -32,8 +30,7 @@ export abstract class ServiceRequestCreator {
 export class StandardServiceRequestCreator extends ServiceRequestCreator {
   public buildCreationAttributes(
     clientId: string,
-    dto: CreateServiceRequestDTO,
-    basePrice: number
+    dto: CreateServiceRequestDTO
   ): IServiceRequestCreationAttributes {
     return {
       clientId,
@@ -45,7 +42,6 @@ export class StandardServiceRequestCreator extends ServiceRequestCreator {
       zone: dto.zone,
       isUrgent: false,
       scheduledDate: dto.scheduledDate || null,
-      estimatedBudget: dto.estimatedBudget || basePrice,
       status: 'PENDING'
     };
   }
@@ -53,13 +49,12 @@ export class StandardServiceRequestCreator extends ServiceRequestCreator {
 
 /**
  * Creador concreto para Solicitudes de Urgencia (Urgent).
- * Asigna prioridad inmediata, fecha actual por defecto y recargo estimado de urgencia si no se especifica.
+ * Asigna prioridad inmediata y fecha actual por defecto si no se especifica.
  */
 export class UrgentServiceRequestCreator extends ServiceRequestCreator {
   public buildCreationAttributes(
     clientId: string,
-    dto: CreateServiceRequestDTO,
-    basePrice: number
+    dto: CreateServiceRequestDTO
   ): IServiceRequestCreationAttributes {
     return {
       clientId,
@@ -71,7 +66,6 @@ export class UrgentServiceRequestCreator extends ServiceRequestCreator {
       zone: dto.zone,
       isUrgent: true,
       scheduledDate: dto.scheduledDate || new Date(),
-      estimatedBudget: dto.estimatedBudget || Math.round(basePrice * 1.25),
       status: 'PENDING'
     };
   }

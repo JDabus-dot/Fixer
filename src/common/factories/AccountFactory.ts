@@ -78,7 +78,7 @@ export class ProfessionalAccountCreator extends AccountCreator {
       )
       .withBio('Profesional verificado en Fixer dispuesto a resolver requerimientos técnicos de calidad.')
       .withLocation('Buenos Aires', 'Cobertura a coordinar', 'Consultar cobertura', 15)
-      .withPricing(12000, '< 30 min', false)
+      .withResponseTime('< 30 min')
       .withReputation(5.0, 0, 'Nuevo Profesional')
       .withSpecialties([dto.tradeCategory || 'Mantenimiento General'])
       .setVerified(false)

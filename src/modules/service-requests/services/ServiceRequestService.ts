@@ -33,7 +33,7 @@ export class ServiceRequestService {
 
     // Patrón Factory Method: Delega la construcción según si es estándar o de urgencia
     const creator = ServiceRequestFactory.getCreator(dto.isUrgent);
-    return creator.create(this.requestRepository, clientId, dto, professional.basePrice);
+    return creator.create(this.requestRepository, clientId, dto);
   }
 
   public async getMyRequestsAsClient(clientId: string): Promise<ServiceRequestModel[]> {

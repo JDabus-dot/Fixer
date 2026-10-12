@@ -12,7 +12,6 @@ export interface IProfessionalProfileAttributes {
   zone: string;
   address: string;
   coverageRadiusKm: number;
-  basePrice: number;
   responseTime: string;
   isEmergencyAvailable: boolean;
   isVerified: boolean;
@@ -51,7 +50,7 @@ export type IProfessionalProfileCreationAttributes = Optional<
 
 /**
  * Modelo Sequelize para el Perfil Profesional (Fixer).
- * Almacena información detallada del oficio, matrícula, tarifario y reputación.
+ * Almacena información detallada del oficio, matrícula, cobertura y reputación.
  */
 export class ProfessionalProfileModel
   extends Model<IProfessionalProfileAttributes, IProfessionalProfileCreationAttributes>
@@ -68,7 +67,6 @@ export class ProfessionalProfileModel
   declare public zone: string;
   declare public address: string;
   declare public coverageRadiusKm: number;
-  declare public basePrice: number;
   declare public responseTime: string;
   declare public isEmergencyAvailable: boolean;
   declare public isVerified: boolean;
@@ -139,11 +137,6 @@ export class ProfessionalProfileModel
         coverageRadiusKm: {
           type: DataTypes.INTEGER,
           defaultValue: 25
-        },
-        basePrice: {
-          type: DataTypes.DECIMAL(10, 2),
-          allowNull: false,
-          defaultValue: 0.0
         },
         responseTime: {
           type: DataTypes.STRING(60),

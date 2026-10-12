@@ -61,7 +61,6 @@ export class DatabaseSeeder {
         'Técnico instalador matriculado con más de 14 años de oficio en obras residenciales, remodelaciones de categoría y consorcios en CABA y Zona Norte. Me especializo en intervenciones no invasivas de máxima precisión, empleando instrumental de detección acústica y termografía infrarroja para diagnosticar fallas sin roturas innecesarias. Cuento con instrumental homologado y compromiso estricto de puntualidad y limpieza en cada trabajo.'
       )
       .withLocation('Bahía Blanca', 'Palermo y Zona Norte', 'San Martín 228, Bahía Blanca', 25)
-      .withPricing(18500, '< 20 min', true)
       .withEmergencyAvailability('< 20 min')
       .withReputation(4.9, 142, 'Fixer Diamond', 121, 17, 3, 1, 0)
       .withSpecialties([
@@ -177,7 +176,6 @@ export class DatabaseSeeder {
       .withTrade('electricidad', 'Electricista Matriculado COPIME & Automatizaciones', 'Matrícula COPIME Nº 29.841', 11)
       .withBio('Especialista en tableros eléctricos certificados, cableados ignífugos y detección de fugas a tierra.')
       .withLocation('CABA', 'Palermo y Belgrano', 'Av. Cabildo 1420', 20)
-      .withPricing(16000, '< 15 min', true)
       .withEmergencyAvailability('< 15 min')
       .withReputation(4.8, 89, 'Fixer Pro', 75, 12, 2, 0, 0)
       .withSpecialties(['Tableros seccionales', 'Monofásica y Trifásica', 'Luces LED empotradas'])
@@ -199,7 +197,7 @@ export class DatabaseSeeder {
       .withTrade('pintura', 'Pintura de Obra, Interiores & Acabados de Alta Calidad', 'Certificación Profesional Fixer 2024', 8)
       .withBio('Pintura látex lavable, esmaltes sintéticos, enduido completo e impermeabilización de terrazas.')
       .withLocation('CABA', 'Recoleta y Caballito', 'Av. Santa Fe 3200', 15)
-      .withPricing(14000, '< 45 min', false)
+      .withResponseTime('< 45 min')
       .withReputation(4.9, 64, 'Fixer Verified', 58, 5, 1, 0, 0)
       .withSpecialties(['Pintura interior', 'Microcemento alisado', 'Impermeabilización'])
       .build();
@@ -215,7 +213,6 @@ export class DatabaseSeeder {
       zone: 'Palermo',
       isUrgent: true,
       scheduledDate: new Date(),
-      estimatedBudget: 22000,
       status: 'PENDING'
     });
 

@@ -9,7 +9,7 @@ export interface IProfessionalSearchFilters {
   isVerified?: boolean;
   isEmergencyAvailable?: boolean;
   minRating?: number;
-  sortBy?: 'rating' | 'price-low' | 'price-high' | 'urgency' | 'experience';
+  sortBy?: 'rating' | 'urgency' | 'experience';
   page?: number;
   limit?: number;
 }

@@ -13,7 +13,6 @@ export interface IServiceRequestAttributes {
   zone: string;
   isUrgent: boolean;
   scheduledDate?: Date | null;
-  estimatedBudget?: number | null;
   status: ServiceRequestStatus;
   cancellationReason?: string | null;
   createdAt?: Date;
@@ -22,11 +21,11 @@ export interface IServiceRequestAttributes {
 
 export type IServiceRequestCreationAttributes = Optional<
   IServiceRequestAttributes,
-  'id' | 'isUrgent' | 'scheduledDate' | 'estimatedBudget' | 'status' | 'cancellationReason' | 'createdAt' | 'updatedAt'
+  'id' | 'isUrgent' | 'scheduledDate' | 'status' | 'cancellationReason' | 'createdAt' | 'updatedAt'
 >;
 
 /**
- * Modelo Sequelize para las Solicitudes de Servicio, Presupuestos y Urgencias.
+ * Modelo Sequelize para las Solicitudes de Servicio y Urgencias.
  */
 export class ServiceRequestModel
   extends Model<IServiceRequestAttributes, IServiceRequestCreationAttributes>
@@ -42,7 +41,6 @@ export class ServiceRequestModel
   declare public zone: string;
   declare public isUrgent: boolean;
   declare public scheduledDate: Date | null;
-  declare public estimatedBudget: number | null;
   declare public status: ServiceRequestStatus;
   declare public cancellationReason: string | null;
 
@@ -101,10 +99,6 @@ export class ServiceRequestModel
         },
         scheduledDate: {
           type: DataTypes.DATE,
-          allowNull: true
-        },
-        estimatedBudget: {
-          type: DataTypes.DECIMAL(10, 2),
           allowNull: true
         },
         status: {

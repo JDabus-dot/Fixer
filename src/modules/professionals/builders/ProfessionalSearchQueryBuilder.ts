@@ -133,12 +133,6 @@ export class ProfessionalSearchQueryBuilder {
    */
   public sortBy(sortBy?: string): this {
     switch (sortBy) {
-      case 'price-low':
-        this.orderClause = [['basePrice', 'ASC']];
-        break;
-      case 'price-high':
-        this.orderClause = [['basePrice', 'DESC']];
-        break;
       case 'urgency':
         this.orderClause = [
           ['isEmergencyAvailable', 'DESC'],
