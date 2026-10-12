@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: fixer_postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fixer_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fixer_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fixer_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fixer_backend_api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: fixer_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_LOGGING: "false"
+      JWT_SECRET: super_secret_jwt_key_fixer_trades_marketplace_2026
+      JWT_EXPIRES_IN: 7d
+      CORS_ORIGIN: "*"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - fixer_network
+
+volumes:
+  postgres_data:
+    name: fixer_postgres_volume
+
+networks:
+  fixer_network:
+    name: fixer_network
+    driver: bridge
