@@ -3,7 +3,7 @@ import { PasswordHasher } from '../../../common/utils/PasswordHasher.js';
 import { TokenService } from '../../../common/utils/TokenService.js';
 import { ConflictError, NotFoundError, UnauthorizedError } from '../../../common/errors/index.js';
 import { LoginDTO, RegisterDTO, ResetPasswordDTO, VerifyAccountDTO } from '../dtos/AuthDTOs.js';
-import { ProfessionalProfileModel } from '../../professionals/models/ProfessionalProfileModel.js';
+import { AccountFactory } from '../../../common/factories/AccountFactory.js';
 import { UserModel } from '../../users/models/UserModel.js';
 
 export interface IAuthResponse {
@@ -22,6 +22,7 @@ export interface IAuthResponse {
 /**
  * Servicio POO de autenticación y seguridad.
  * Aplica SOLID inyectando repositorios y utilidades de cifrado.
+ * Delega la creación de cuentas a AccountFactory (Factory Method), cumpliendo SRP y OCP.
  */
 export class AuthService {
   private readonly userRepository: IUserRepository;
@@ -47,43 +48,13 @@ export class AuthService {
     const passwordHash = await this.passwordHasher.hash(dto.password);
     const securityAnswerHash = await this.passwordHasher.hash(dto.securityAnswer.trim().toLowerCase());
 
-    const role = dto.isPro ? 'PROFESSIONAL' : 'CLIENT';
-
-    const newUser = await this.userRepository.create({
-      fullName: dto.fullName,
-      email: dto.email.toLowerCase().trim(),
-      phone: dto.phone,
+    // Patrón Factory Method: Delega la creación de la jerarquía de cuenta y perfil asociado
+    const { user: newUser } = await AccountFactory.createAccount(
+      dto.isPro,
+      dto,
       passwordHash,
-      role,
-      securityQuestion: dto.securityQuestion,
-      securityAnswerHash,
-      termsAccepted: true,
-      isActive: true
-    });
-
-    // Si es profesional, crea su perfil base asociado
-    if (dto.isPro) {
-      await ProfessionalProfileModel.create({
-        userId: newUser.id,
-        tradeCategory: dto.tradeCategory || 'otro',
-        headline: `Especialista en ${dto.tradeCategory || 'servicios generales'}`,
-        bio: 'Profesional verificado en Fixer dispuesto a resolver requerimientos técnicos de calidad.',
-        licenseNumber: 'En proceso de validación',
-        experienceYears: 1,
-        city: 'Buenos Aires',
-        zone: 'Cobertura a coordinar',
-        address: 'Consultar cobertura',
-        coverageRadiusKm: 15,
-        basePrice: 12000,
-        responseTime: '< 30 min',
-        isEmergencyAvailable: false,
-        isVerified: false,
-        badgeLevel: 'Nuevo Profesional',
-        ratingAverage: 5.0,
-        totalReviews: 0,
-        specialties: [dto.tradeCategory || 'Mantenimiento General']
-      });
-    }
+      securityAnswerHash
+    );
 
     const token = this.tokenService.generateToken({
       id: newUser.id,

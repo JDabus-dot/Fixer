@@ -1,4 +1,3 @@
-import { Op, Order, Sequelize } from 'sequelize';
 import { ProfessionalProfileModel } from '../models/ProfessionalProfileModel.js';
 import {
   IProfessionalRepository,
@@ -7,6 +6,7 @@ import {
 } from '../interfaces/IProfessionalRepository.js';
 import { UserModel } from '../../users/models/UserModel.js';
 import { ReviewModel } from '../../reviews/models/ReviewModel.js';
+import { ProfessionalSearchQueryBuilder } from '../builders/ProfessionalSearchQueryBuilder.js';
 
 /**
  * Implementación POO del repositorio de Profesionales utilizando Sequelize.
@@ -76,107 +76,12 @@ export class ProfessionalRepository implements IProfessionalRepository {
   }
 
   public async search(filters: IProfessionalSearchFilters): Promise<IProfessionalSearchResult> {
-    const page = Math.max(Number(filters.page) || 1, 1);
-    const limit = Math.max(Number(filters.limit) || 12, 1);
-    const offset = (page - 1) * limit;
+    // Patrón Creacional: BUILDER para consultas complejas de búsqueda
+    const queryBuilder = ProfessionalSearchQueryBuilder.fromFilters(filters);
+    const queryOptions = queryBuilder.build();
 
-    const whereClause: Record<string | symbol, unknown> = {};
-
-    // 1. Filtro por categoría de oficio (plomería, electricidad, gas, etc.)
-    if (filters.category && filters.category.trim() !== '') {
-      whereClause.tradeCategory = {
-        [Op.iLike]: `%${filters.category.trim()}%`
-      };
-    }
-
-    // 2. Filtro por zona o ciudad
-    if (filters.zone && filters.zone.trim() !== '') {
-      whereClause[Op.or] = [
-        { zone: { [Op.iLike]: `%${filters.zone.trim()}%` } },
-        { city: { [Op.iLike]: `%${filters.zone.trim()}%` } },
-        { address: { [Op.iLike]: `%${filters.zone.trim()}%` } }
-      ];
-    } else if (filters.city && filters.city.trim() !== '') {
-      whereClause.city = { [Op.iLike]: `%${filters.city.trim()}%` };
-    }
-
-    // 3. Filtros booleanos: Matriculados / Urgencias Hoy
-    if (filters.isVerified !== undefined) {
-      whereClause.isVerified = filters.isVerified;
-    }
-
-    if (filters.isEmergencyAvailable !== undefined) {
-      whereClause.isEmergencyAvailable = filters.isEmergencyAvailable;
-    }
-
-    // 4. Filtro por calificación mínima (e.g. 4.8+)
-    if (filters.minRating !== undefined) {
-      whereClause.ratingAverage = {
-        [Op.gte]: filters.minRating
-      };
-    }
-
-    // 5. Búsqueda de texto libre (nombre, apellido, titular, especialidades, bio)
-    if (filters.query && filters.query.trim() !== '') {
-      const q = `%${filters.query.trim()}%`;
-      const orConditions: Array<any> = [
-        Sequelize.where(Sequelize.col('user.full_name'), { [Op.iLike]: q }),
-        { headline: { [Op.iLike]: q } },
-        { bio: { [Op.iLike]: q } },
-        { tradeCategory: { [Op.iLike]: q } },
-        { licenseNumber: { [Op.iLike]: q } }
-      ];
-
-      if (whereClause[Op.or]) {
-        whereClause[Op.and] = [{ [Op.or]: whereClause[Op.or] }, { [Op.or]: orConditions }];
-        delete whereClause[Op.or];
-      } else {
-        whereClause[Op.or] = orConditions;
-      }
-    }
-
-    // 6. Ordenamiento
-    let order: Order = [['ratingAverage', 'DESC']];
-    switch (filters.sortBy) {
-      case 'price-low':
-        order = [['basePrice', 'ASC']];
-        break;
-      case 'price-high':
-        order = [['basePrice', 'DESC']];
-        break;
-      case 'urgency':
-        order = [
-          ['isEmergencyAvailable', 'DESC'],
-          ['ratingAverage', 'DESC']
-        ];
-        break;
-      case 'experience':
-        order = [['experienceYears', 'DESC']];
-        break;
-      case 'rating':
-      default:
-        order = [
-          ['ratingAverage', 'DESC'],
-          ['totalReviews', 'DESC']
-        ];
-        break;
-    }
-
-    const { count, rows } = await ProfessionalProfileModel.findAndCountAll({
-      where: whereClause,
-      include: [
-        {
-          model: UserModel,
-          as: 'user',
-          attributes: ['id', 'fullName', 'email', 'phone', 'avatarUrl']
-        }
-      ],
-      order,
-      limit,
-      offset,
-      subQuery: false,
-      distinct: true
-    });
+    const { count, rows } = await ProfessionalProfileModel.findAndCountAll(queryOptions);
+    const { page, limit } = queryBuilder.getPagination();
 
     return {
       professionals: rows,

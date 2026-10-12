@@ -11,8 +11,7 @@ export const CreateServiceRequestSchema = z.object({
   scheduledDate: z
     .string()
     .optional()
-    .transform((val) => (val ? new Date(val) : undefined)),
-  estimatedBudget: z.number().min(0).optional()
+    .transform((val) => (val ? new Date(val) : undefined))
 });
 
 export type CreateServiceRequestDTO = z.infer<typeof CreateServiceRequestSchema>;

@@ -21,7 +21,7 @@ export class ServiceRequestRouter {
   }
 
   private initializeRoutes(): void {
-    // Crear solicitud de servicio / presupuesto / urgencia (cliente autenticado)
+    // Crear solicitud de servicio / urgencia (cliente autenticado)
     this.router.post(
       '/',
       this.authMiddleware.authenticate,

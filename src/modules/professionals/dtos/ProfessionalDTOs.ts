@@ -17,7 +17,7 @@ export const SearchProfessionalsSchema = z.object({
     .string()
     .optional()
     .transform((val) => (val === undefined ? undefined : Number(val))),
-  sortBy: z.enum(['rating', 'price-low', 'price-high', 'urgency', 'experience']).optional().default('rating'),
+  sortBy: z.enum(['rating', 'urgency', 'experience']).optional().default('rating'),
   page: z
     .string()
     .optional()
@@ -40,7 +40,6 @@ export const UpdateProfessionalProfileSchema = z.object({
   zone: z.string().optional(),
   address: z.string().optional(),
   coverageRadiusKm: z.number().int().min(1).optional(),
-  basePrice: z.number().min(0).optional(),
   responseTime: z.string().optional(),
   isEmergencyAvailable: z.boolean().optional(),
   specialties: z.array(z.string()).optional()
