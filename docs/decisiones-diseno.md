@@ -4,10 +4,23 @@ El presente documento intenta detallar las decisiones de diseño que se trabajar
 
 ## Diagnostico
 
-1. Sobre el codigo analizado se detecto que en el flujo de registro se crea dos jerarquias de entidades totalmente distintas segun el rol del usuario (Cliente o Profesional) que ocasionaba que en la clase AuthService este presente un condicional: if (dto.isPro) donde conoce detalles de la instancia del perfil de profesional, lo que viola el principio de OCP (Principio Open/Close de Solid).
-2. Ademas se detecto un objeto muy complejo que es el de perfil de profesional(ProfessionalProfileModel) con mas de 18 atributos que ocasiona instanciaciones gigantescas y de dificil mantenibilidad o escalabilidad futura, por lo que se decide implementar el patron creacional Builder para permitir la construccion paso a paso y simplificar la creacion de los objetos de este tipo y centralizar el proceso de creacion.
+Sobre el código analizado del backend se detectaron dos problemas de diseño, cada uno con un costo concreto de mantenimiento.
 
-Dado el tamaño del proyecto y el objetivo MVP contemplado no se necesita de los patrones de comportamiento, estructurales o el creacional Singleton vistos en la catedra ya que su implementacion complejizaria el proyecto sin entregar valor agregado.
+1. Problema 1: condicional creciente en el registro (AuthService).
+En el flujo de registro se crean entidades distintas según el rol: un Cliente genera solo un usuario, mientras que un Profesional genera un usuario y además su perfil (ProfessionalProfileModel). Esa decisión estaba resuelta dentro de AuthService con un condicional if (dto.isPro), lo que implica que esta clase conoce detalles de cómo se instancia un perfil profesional. Esto tiene tres consecuencias:
+
+- Viola OCP: cada rol nuevo (por ejemplo, empresa o contratista) obliga a modificar AuthService, una clase estable y sensible porque maneja autenticación y emisión del JWT.
+- Viola SRP: AuthService tiene dos motivos de cambio distintos, la lógica de autenticación y la lógica de creación de cada tipo de cuenta.
+- Genera acoplamiento fuerte: un cambio en la estructura del perfil profesional impacta en el servicio de autenticación.
+
+Las variantes (Cliente y Profesional) evolucionan de forma independiente, por lo que se decide separar su creación mediante el patrón creacional Factory Method: una clase abstracta AccountCreator con una subclase por rol, de modo que AuthService dependa de la abstracción y no de las clases concretas.   
+
+2. Problema 2: objeto con demasiados atributos (ProfessionalProfileModel).
+El perfil profesional tiene más de 18 atributos (rubro, matrícula, ubicación, radio de cobertura, disponibilidad de urgencias, reputación, etc.). Instanciarlo en un solo paso implica constructores con una lista extensa de parámetros, difíciles de invocar, de recordar en orden y de extender sin romper los llamados existentes. Esto vuelve costosos los seeders y los tests, donde se necesitan perfiles con distintas combinaciones de datos.
+
+Para centralizar la creación y permitir una construcción paso a paso con valores por defecto razonables, se decide implementar el patrón creacional Builder (ProfessionalProfileBuilder).
+
+Alcance de los patrones. Dado el tamaño del proyecto y el objetivo MVP, no se justifica incorporar patrones de comportamiento, estructurales ni el creacional Singleton: no hay una tensión concreta de diseño que resuelvan, y su implementación sumaría complejidad sin valor agregado.
 
 ## Alternativas
 
@@ -15,7 +28,7 @@ La alternativa seria no implementar el Factory y dejar solo el Builder, pero rom
 
 ## Decisión
 
-Implementar Factory y Builder segun lo aclarado en el Diagnostico.
+Implementar Factory Method para la creación de cuentas y Builder para la construcción del perfil profesional.
 
 ## Evidencia
 
