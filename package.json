@@ -3,16 +3,17 @@
   "version": "1.0.0",
   "description": "Backend API RESTful para la plataforma Fixer Trades Marketplace construida con Node.js, Express, TypeScript, Sequelize y PostgreSQL bajo Clean Code, SOLID y POO.",
   "main": "dist/server.js",
-  "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "test": "vitest run",
-    "test:unit": "vitest run",
-    "test:integration": "vitest run",
-    "test:watch": "vitest",
-    "test:legacy": "tsx --test src/__tests__/**/*.ts"
-  },
+  
+"scripts": {
+  "dev": "tsx watch src/server.ts",
+  "build": "tsc",
+  "start": "node dist/server.js",
+  "test": "vitest run",
+  "test:unit": "vitest run src/__tests__/unit",
+  "test:integration": "vitest run src/__tests__/integration",
+  "test:watch": "vitest",
+  "test:legacy": "tsx --test src/__tests__/**/*.ts"
+},
   "keywords": [
     "nodejs",
     "typescript",
