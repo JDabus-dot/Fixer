@@ -7,7 +7,11 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "tsx --test src/__tests__/**/*.ts"
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:integration": "vitest run",
+    "test:watch": "vitest",
+    "test:legacy": "tsx --test src/__tests__/**/*.ts"
   },
   "keywords": [
     "nodejs",
@@ -43,9 +47,12 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.13.4",
     "@types/pg": "^8.11.11",
+    "@types/supertest": "^7.2.1",
     "lint-staged": "^17.6.0",
+    "supertest": "^7.3.2",
     "tsx": "^4.19.3",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^5.1.0"
   },
   "lint-staged": {
     "*.{ts,js,json,md,yml,yaml}": "git diff --check --cached --"

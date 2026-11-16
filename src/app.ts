@@ -35,14 +35,24 @@ import { ReviewRouter } from './modules/reviews/routes/ReviewRouter.js';
 import { ServiceRequestRouter } from './modules/service-requests/routes/ServiceRequestRouter.js';
 import { AuthMiddleware } from './common/middlewares/AuthMiddleware.js';
 
-/**
- * Clase principal de la Aplicación Express bajo POO.
- * Encapsula la configuración de middlewares, inyección de dependencias y registro de rutas.
- */
+export interface AppRepositories {
+  userRepository: UserRepository;
+  professionalRepository: ProfessionalRepository;
+  reviewRepository: ReviewRepository;
+  serviceRequestRepository: ServiceRequestRepository;
+}
+
 export class App {
   public readonly app: Application;
 
-  constructor() {
+  constructor(
+    private readonly repositories: AppRepositories = {
+      userRepository: new UserRepository(),
+      professionalRepository: new ProfessionalRepository(),
+      reviewRepository: new ReviewRepository(),
+      serviceRequestRepository: new ServiceRequestRepository()
+    }
+  ) {
     this.app = express();
     this.setupMiddlewares();
     this.setupRoutes();
@@ -63,12 +73,13 @@ export class App {
   }
 
   private setupRoutes(): void {
-    // 1. Inyección de Dependencias (DIP)
-    const userRepository = new UserRepository();
-    const professionalRepository = new ProfessionalRepository();
-    const reviewRepository = new ReviewRepository();
-    const serviceRequestRepository = new ServiceRequestRepository();
-
+    
+    const {
+      userRepository,
+      professionalRepository,
+      reviewRepository,
+      serviceRequestRepository
+    } = this.repositories;
     const authMiddleware = new AuthMiddleware();
 
     const userService = new UserService(userRepository);
