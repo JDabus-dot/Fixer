@@ -16,7 +16,7 @@ export interface IProfessionalProfileAttributes {
   isEmergencyAvailable: boolean;
   isVerified: boolean;
   badgeLevel: string;
-  ratingAverage: number;
+  ratingAverage: number | null;
   totalReviews: number;
   fiveStarCount: number;
   fourStarCount: number;
@@ -71,7 +71,7 @@ export class ProfessionalProfileModel
   declare public isEmergencyAvailable: boolean;
   declare public isVerified: boolean;
   declare public badgeLevel: string;
-  declare public ratingAverage: number;
+  declare public ratingAverage: number | null;
   declare public totalReviews: number;
   declare public fiveStarCount: number;
   declare public fourStarCount: number;
@@ -156,7 +156,7 @@ export class ProfessionalProfileModel
         },
         ratingAverage: {
           type: DataTypes.DECIMAL(3, 2),
-          defaultValue: 5.0
+          defaultValue: null
         },
         totalReviews: {
           type: DataTypes.INTEGER,

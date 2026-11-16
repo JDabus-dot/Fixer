@@ -102,7 +102,7 @@ export class ProfessionalRepository implements IProfessionalRepository {
     if (totalReviews === 0) {
       await ProfessionalProfileModel.update(
         {
-          ratingAverage: 5.0,
+          ratingAverage: null,
           totalReviews: 0,
           fiveStarCount: 0,
           fourStarCount: 0,
