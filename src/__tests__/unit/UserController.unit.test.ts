@@ -6,12 +6,13 @@ import type { IAuthenticatedRequest } from '../../common/interfaces/index.js';
 import type { UserModel } from '../../modules/users/models/UserModel.js';
 import { UnauthorizedError } from '../../common/errors/index.js';
 
+
 describe('UserController - Tests unitarios', () => {
   const userId = 'user-1';
   const user = {
     id: userId,
-    fullName: 'Juan Martínez',
-    email: 'juan@example.com'
+    fullName: 'Juan MartÃ­nez',
+    email: 'juan.martinez@example.com'
   } as unknown as UserModel;
 
   let userService: {
@@ -27,7 +28,7 @@ describe('UserController - Tests unitarios', () => {
 
   const buildRequest = (overrides: Partial<IAuthenticatedRequest> = {}): IAuthenticatedRequest =>
     ({
-      user: { id: userId, email: 'juan@example.com', role: 'CLIENT', fullName: 'Juan Martínez' },
+      user: { id: userId, email: 'juan.martinez@example.com', role: 'CLIENT', fullName: 'Juan MartÃ­nez' },
       body: {},
       ...overrides
     }) as unknown as IAuthenticatedRequest;
@@ -46,7 +47,9 @@ describe('UserController - Tests unitarios', () => {
     };
   });
 
+  // getMyProfile: devolver el perfil del usuario autenticado.
   describe('getMyProfile', () => {
+    // Usuario autenticado â†’ 200 con formato estÃ¡ndar de la API.
     it('devuelve el perfil y responde con success', async () => {
       const req = buildRequest();
 
@@ -61,6 +64,7 @@ describe('UserController - Tests unitarios', () => {
       });
     });
 
+
     it('lanza UnauthorizedError si no hay usuario autenticado', async () => {
       const req = buildRequest({ user: undefined });
 
@@ -73,13 +77,15 @@ describe('UserController - Tests unitarios', () => {
     });
   });
 
+  // updateMyProfile: actualizar el perfil del usuario autenticado.
   describe('updateMyProfile', () => {
     const body = {
-      fullName: 'Juan Martínez Actualizado',
+      fullName: 'Juan MartÃ­nez Actualizado',
       phone: '+5491199999999',
       avatarUrl: 'https://cdn.fixer.com/avatar.png'
     };
 
+    // Usuario autenticado + body :200 y se delega el body al service.
     it('actualiza el perfil y responde con success', async () => {
       const req = buildRequest({ body });
 
