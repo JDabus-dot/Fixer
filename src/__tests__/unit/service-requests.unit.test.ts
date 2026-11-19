@@ -9,8 +9,47 @@ import {
   StandardServiceRequestCreator,
   UrgentServiceRequestCreator
 } from '../../modules/service-requests/factories/ServiceRequestFactory.js';
+import { ServiceRequestService } from '../../modules/service-requests/services/ServiceRequestService.js';
+import { IServiceRequestRepository } from '../../modules/service-requests/interfaces/IServiceRequestRepository.js';
+import { ServiceRequestModel } from '../../modules/service-requests/models/ServiceRequestModel.js';
+import { IProfessionalRepository } from '../../modules/professionals/interfaces/IProfessionalRepository.js';
+import { ProfessionalProfileModel } from '../../modules/professionals/models/ProfessionalProfileModel.js';
+import { BadRequestError, ForbiddenError, NotFoundError } from '../../common/errors/index.js';
 
 const VALID_PROFESSIONAL_ID = '550e8400-e29b-41d4-a716-446655440000';
+
+function createRequestRepoStub(
+  overrides: Partial<IServiceRequestRepository> = {}
+): IServiceRequestRepository {
+  return {
+    findById: async () => null,
+    findAll: async () => [],
+    findByClientId: async () => [],
+    findByProfessionalId: async () => [],
+    updateStatus: async () => null,
+    create: async (item) => ({ id: 'req-1', ...item } as ServiceRequestModel),
+    update: async () => null,
+    delete: async () => false,
+    ...overrides
+  };
+}
+
+function createProfessionalRepoStub(
+  overrides: Partial<IProfessionalRepository> = {}
+): IProfessionalRepository {
+  return {
+    findById: async () => null,
+    findByIdWithDetails: async () => null,
+    findByUserId: async () => null,
+    findAll: async () => [],
+    search: async () => ({ professionals: [], total: 0, totalPages: 0, page: 1, limit: 12 }),
+    recalculateRatings: async () => undefined,
+    create: async (item) => item as ProfessionalProfileModel,
+    update: async () => null,
+    delete: async () => false,
+    ...overrides
+  };
+}
 
 describe('Unitario — DTOs de Solicitudes de Servicio (Zod)', () => {
   it('U1: CreateServiceRequestSchema valida UUID y longitudes, aplica isUrgent=false por defecto y transforma scheduledDate a Date', () => {
@@ -104,5 +143,52 @@ describe('Unitario — ServiceRequestFactory (Factory Method)', () => {
       isUrgent: true
     });
     assert.equal(alreadyPrefixed.title, '[URGENTE] Corte general en tablero');
+  });
+});
+
+describe('Unitario — ServiceRequestService', () => {
+  it('U4: createRequest() lanza NotFoundError si el profesional no existe, BadRequestError en auto-solicitud y persiste si es válido', async () => {
+    const dto = {
+      professionalId: VALID_PROFESSIONAL_ID,
+      title: 'Instalación de termotanque',
+      description: 'Reemplazo de termotanque a gas de 80 litros.',
+      category: 'gas',
+      serviceAddress: 'Sarmiento 910',
+      zone: 'Microcentro',
+      isUrgent: true
+    };
+
+    const serviceMissingPro = new ServiceRequestService(
+      createRequestRepoStub(),
+      createProfessionalRepoStub({ findById: async () => null })
+    );
+
+    await assert.rejects(
+      () => serviceMissingPro.createRequest('client-1', dto),
+      (err: unknown) => err instanceof NotFoundError && err.statusCode === 404
+    );
+
+    const proProfile = {
+      id: VALID_PROFESSIONAL_ID,
+      userId: 'user-pro-1'
+    } as ProfessionalProfileModel;
+
+    const serviceWithPro = new ServiceRequestService(
+      createRequestRepoStub(),
+      createProfessionalRepoStub({ findById: async () => proProfile })
+    );
+
+    // El mismo usuario profesional intenta solicitarse a sí mismo -> 400
+    await assert.rejects(
+      () => serviceWithPro.createRequest('user-pro-1', dto),
+      (err: unknown) => err instanceof BadRequestError && err.statusCode === 400
+    );
+
+    // Cliente distinto -> crea la solicitud delegando en la fábrica
+    const created = await serviceWithPro.createRequest('client-99', dto);
+    assert.equal(created.clientId, 'client-99');
+    assert.equal(created.professionalId, VALID_PROFESSIONAL_ID);
+    assert.equal(created.isUrgent, true);
+    assert.equal(created.title, '[URGENTE] Instalación de termotanque');
   });
 });
