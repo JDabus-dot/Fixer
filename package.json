@@ -3,17 +3,16 @@
   "version": "1.0.0",
   "description": "Backend API RESTful para la plataforma Fixer Trades Marketplace construida con Node.js, Express, TypeScript, Sequelize y PostgreSQL bajo Clean Code, SOLID y POO.",
   "main": "dist/server.js",
-  
-"scripts": {
-  "dev": "tsx watch src/server.ts",
-  "build": "tsc",
-  "start": "node dist/server.js",
-  "test": "vitest run",
-  "test:unit": "vitest run src/__tests__/unit",
-  "test:integration": "vitest run src/__tests__/integration",
-  "test:watch": "vitest",
-  "test:legacy": "tsx --test src/__tests__/**/*.ts"
-},
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:unit": "vitest run src/__tests__/unit",
+    "test:integration": "vitest run src/__tests__/integration",
+    "test:watch": "vitest",
+    "test:legacy": "tsx --test src/__tests__/**/*.ts"
+  },
   "keywords": [
     "nodejs",
     "typescript",
@@ -38,6 +37,8 @@
     "pg": "^8.13.1",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.5",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -49,6 +50,8 @@
     "@types/node": "^22.13.4",
     "@types/pg": "^8.11.11",
     "@types/supertest": "^7.2.1",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "lint-staged": "^17.6.0",
     "supertest": "^7.3.2",
     "tsx": "^4.19.3",
