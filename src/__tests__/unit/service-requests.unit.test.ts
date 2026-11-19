@@ -220,4 +220,51 @@ describe('Unitario — ServiceRequestService', () => {
       (err: unknown) => err instanceof NotFoundError && err.statusCode === 404
     );
   });
+
+  it('U6: updateStatus() permite cambios solo al cliente dueño o al profesional asignado y bloquea a terceros con ForbiddenError', async () => {
+    const existingReq = {
+      id: 'req-100',
+      clientId: 'client-owner',
+      professionalId: 'prof-assigned',
+      status: 'PENDING'
+    } as ServiceRequestModel;
+
+    const service = new ServiceRequestService(
+      createRequestRepoStub({
+        findById: async (id) => (id === 'req-100' ? existingReq : null),
+        updateStatus: async (id, status, reason) =>
+          ({ ...existingReq, id, status, cancellationReason: reason ?? null } as ServiceRequestModel)
+      }),
+      createProfessionalRepoStub({
+        findById: async (id) =>
+          id === 'prof-assigned'
+            ? ({ id: 'prof-assigned', userId: 'user-pro-assigned' } as ProfessionalProfileModel)
+            : null
+      })
+    );
+
+    // 1. Solicitud inexistente -> 404
+    await assert.rejects(
+      () => service.updateStatus('req-inexistente', 'client-owner', { status: 'CANCELLED' }),
+      (err: unknown) => err instanceof NotFoundError && err.statusCode === 404
+    );
+
+    // 2. Tercero ajeno -> 403 Forbidden
+    await assert.rejects(
+      () => service.updateStatus('req-100', 'intruder-user', { status: 'CANCELLED' }),
+      (err: unknown) => err instanceof ForbiddenError && err.statusCode === 403
+    );
+
+    // 3. Profesional asignado -> permitido
+    const byPro = await service.updateStatus('req-100', 'user-pro-assigned', { status: 'ACCEPTED' });
+    assert.equal(byPro.status, 'ACCEPTED');
+
+    // 4. Cliente dueño -> permitido con motivo
+    const byClient = await service.updateStatus('req-100', 'client-owner', {
+      status: 'CANCELLED',
+      reason: 'Solucionado'
+    });
+    assert.equal(byClient.status, 'CANCELLED');
+    assert.equal(byClient.cancellationReason, 'Solucionado');
+  });
 });
