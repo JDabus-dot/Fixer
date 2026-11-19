@@ -1,4 +1,4 @@
-import { describe, it } from 'vitest';
+import { afterEach, describe, it, vi } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   CreateServiceRequestSchema,
@@ -10,6 +10,7 @@ import {
   UrgentServiceRequestCreator
 } from '../../modules/service-requests/factories/ServiceRequestFactory.js';
 import { ServiceRequestService } from '../../modules/service-requests/services/ServiceRequestService.js';
+import { ServiceRequestRepository } from '../../modules/service-requests/repositories/ServiceRequestRepository.js';
 import { IServiceRequestRepository } from '../../modules/service-requests/interfaces/IServiceRequestRepository.js';
 import { ServiceRequestModel } from '../../modules/service-requests/models/ServiceRequestModel.js';
 import { IProfessionalRepository } from '../../modules/professionals/interfaces/IProfessionalRepository.js';
@@ -266,5 +267,49 @@ describe('Unitario — ServiceRequestService', () => {
     });
     assert.equal(byClient.status, 'CANCELLED');
     assert.equal(byClient.cancellationReason, 'Solucionado');
+  });
+});
+
+describe('Unitario — ServiceRequestRepository', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('U7: updateStatus() retorna null si no existe o actualiza el estado conservando cancellationReason previa cuando no se envía nueva', async () => {
+    const repo = new ServiceRequestRepository();
+
+    vi.spyOn(ServiceRequestModel, 'findByPk').mockImplementation((async () => null) as never);
+    const missing = await repo.updateStatus('missing-id', 'ACCEPTED');
+    assert.equal(missing, null);
+
+    vi.restoreAllMocks();
+
+    const payloads: Array<Record<string, unknown>> = [];
+    const instanceStub = {
+      id: 'req-200',
+      status: 'PENDING',
+      cancellationReason: 'Motivo previo',
+      update: async (payload: Record<string, unknown>) => {
+        payloads.push(payload);
+        Object.assign(instanceStub, payload);
+        return instanceStub;
+      }
+    } as unknown as ServiceRequestModel;
+
+    vi.spyOn(ServiceRequestModel, 'findByPk').mockImplementation((async () => instanceStub) as never);
+
+    // Sin nuevo reason -> preserva cancellationReason previa
+    await repo.updateStatus('req-200', 'IN_PROGRESS');
+    assert.deepEqual(payloads[0], {
+      status: 'IN_PROGRESS',
+      cancellationReason: 'Motivo previo'
+    });
+
+    // Con nuevo reason -> sobrescribe cancellationReason
+    await repo.updateStatus('req-200', 'CANCELLED', 'Falta de repuestos');
+    assert.deepEqual(payloads[1], {
+      status: 'CANCELLED',
+      cancellationReason: 'Falta de repuestos'
+    });
   });
 });
