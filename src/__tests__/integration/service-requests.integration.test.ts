@@ -271,4 +271,83 @@ describe('Integración — Módulo de Solicitudes de Servicio (/api/v1/service-r
     assert.equal(urgentBody.data.status, 'PENDING');
     assert.ok(urgentBody.data.scheduledDate);
   });
+
+  it('I2: GET /client/my-requests y GET /pro/my-requests aplican RBAC (403 a CLIENT en ruta pro) y aíslan bandejas por usuario', async () => {
+    const client1Token = tokenService.generateToken({
+      id: 'client-1',
+      email: 'cliente1@fixer.com',
+      role: 'CLIENT',
+      fullName: 'Javier Rossi'
+    });
+    const client2Token = tokenService.generateToken({
+      id: 'client-2',
+      email: 'cliente2@fixer.com',
+      role: 'CLIENT',
+      fullName: 'Lucía Fernández'
+    });
+    const proCarlosToken = tokenService.generateToken({
+      id: 'user-pro-1',
+      email: 'carlos@fixer.com',
+      role: 'PROFESSIONAL',
+      fullName: 'Carlos Mendoza'
+    });
+
+    // Cliente 1 crea solicitud para Carlos
+    await fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${client1Token}` },
+      body: JSON.stringify({
+        professionalId: PRO_CARLOS_ID,
+        title: 'Cambio de grifería monocomando',
+        description: 'Reemplazo de grifería en cocina y ajuste de flexibles.',
+        category: 'plomeria',
+        serviceAddress: 'San Martín 228',
+        zone: 'Centro'
+      })
+    });
+
+    // Cliente 2 crea solicitud para Roberto
+    await fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${client2Token}` },
+      body: JSON.stringify({
+        professionalId: PRO_ROBERTO_ID,
+        title: 'Revisión de tablero eléctrico',
+        description: 'Instalación de protector de tensión en tablero principal.',
+        category: 'electricidad',
+        serviceAddress: 'Av. Cabildo 1420',
+        zone: 'Belgrano'
+      })
+    });
+
+    // 1. Cliente 1 solo ve su propia solicitud
+    const clientInboxRes = await fetch(`${baseUrl}/client/my-requests`, {
+      headers: { Authorization: `Bearer ${client1Token}` }
+    });
+    const clientInboxBody = (await clientInboxRes.json()) as {
+      success: boolean;
+      data: IInMemoryServiceRequestRecord[];
+    };
+    assert.equal(clientInboxRes.status, 200);
+    assert.equal(clientInboxBody.data.length, 1);
+    assert.equal(clientInboxBody.data[0].professionalId, PRO_CARLOS_ID);
+
+    // 2. Un usuario con rol CLIENT recibe 403 Forbidden en /pro/my-requests
+    const forbiddenProRes = await fetch(`${baseUrl}/pro/my-requests`, {
+      headers: { Authorization: `Bearer ${client1Token}` }
+    });
+    assert.equal(forbiddenProRes.status, 403);
+
+    // 3. El profesional Carlos ve únicamente las solicitudes dirigidas a su perfil
+    const proInboxRes = await fetch(`${baseUrl}/pro/my-requests`, {
+      headers: { Authorization: `Bearer ${proCarlosToken}` }
+    });
+    const proInboxBody = (await proInboxRes.json()) as {
+      success: boolean;
+      data: IInMemoryServiceRequestRecord[];
+    };
+    assert.equal(proInboxRes.status, 200);
+    assert.equal(proInboxBody.data.length, 1);
+    assert.equal(proInboxBody.data[0].clientId, 'client-1');
+  });
 });
