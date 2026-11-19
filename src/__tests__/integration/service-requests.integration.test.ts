@@ -350,4 +350,77 @@ describe('Integración — Módulo de Solicitudes de Servicio (/api/v1/service-r
     assert.equal(proInboxBody.data.length, 1);
     assert.equal(proInboxBody.data[0].clientId, 'client-1');
   });
+
+  it('I3: PATCH /:id/status permite actualizar estado al profesional asignado y al cliente dueño, y bloquea a terceros con 403', async () => {
+    const ownerToken = tokenService.generateToken({
+      id: 'client-owner',
+      email: 'owner@fixer.com',
+      role: 'CLIENT',
+      fullName: 'Javier Rossi'
+    });
+    const assignedProToken = tokenService.generateToken({
+      id: 'user-pro-1',
+      email: 'carlos@fixer.com',
+      role: 'PROFESSIONAL',
+      fullName: 'Carlos Mendoza'
+    });
+    const intruderToken = tokenService.generateToken({
+      id: 'user-pro-2',
+      email: 'roberto@fixer.com',
+      role: 'PROFESSIONAL',
+      fullName: 'Roberto Gómez'
+    });
+
+    const createRes = await fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ownerToken}` },
+      body: JSON.stringify({
+        professionalId: PRO_CARLOS_ID,
+        title: 'Instalación de calefón tiro balanceado',
+        description: 'Colocación y prueba de hermeticidad en lavadero.',
+        category: 'gas',
+        serviceAddress: 'San Martín 228',
+        zone: 'Centro'
+      })
+    });
+    const created = ((await createRes.json()) as { data: IInMemoryServiceRequestRecord }).data;
+
+    // 1. Tercero ajeno a la solicitud (otro profesional) -> 403 Forbidden
+    const intruderRes = await fetch(`${baseUrl}/${created.id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${intruderToken}` },
+      body: JSON.stringify({ status: 'ACCEPTED' })
+    });
+    assert.equal(intruderRes.status, 403);
+
+    // 2. Profesional asignado acepta la solicitud -> 200 OK
+    const acceptRes = await fetch(`${baseUrl}/${created.id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${assignedProToken}` },
+      body: JSON.stringify({ status: 'ACCEPTED' })
+    });
+    const acceptBody = (await acceptRes.json()) as {
+      success: boolean;
+      data: IInMemoryServiceRequestRecord;
+    };
+    assert.equal(acceptRes.status, 200);
+    assert.equal(acceptBody.data.status, 'ACCEPTED');
+
+    // 3. Cliente dueño cancela la solicitud indicando reason -> 200 OK y persiste cancellationReason
+    const cancelRes = await fetch(`${baseUrl}/${created.id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ownerToken}` },
+      body: JSON.stringify({
+        status: 'CANCELLED',
+        reason: 'Reprogramado para la próxima semana'
+      })
+    });
+    const cancelBody = (await cancelRes.json()) as {
+      success: boolean;
+      data: IInMemoryServiceRequestRecord;
+    };
+    assert.equal(cancelRes.status, 200);
+    assert.equal(cancelBody.data.status, 'CANCELLED');
+    assert.equal(cancelBody.data.cancellationReason, 'Reprogramado para la próxima semana');
+  });
 });
