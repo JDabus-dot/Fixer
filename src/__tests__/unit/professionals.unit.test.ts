@@ -1,24 +1,24 @@
-import { afterEach, describe, it, mock } from 'node:test';
+import { afterEach, describe, it, vi } from 'vitest';
 import assert from 'node:assert/strict';
 import { Op } from 'sequelize';
 import {
   SearchProfessionalsSchema,
   UpdateProfessionalProfileSchema
-} from '../modules/professionals/dtos/ProfessionalDTOs.js';
-import { ProfessionalProfileBuilder } from '../modules/professionals/builders/ProfessionalProfileBuilder.js';
-import { ProfessionalSearchQueryBuilder } from '../modules/professionals/builders/ProfessionalSearchQueryBuilder.js';
-import { ProfessionalService } from '../modules/professionals/services/ProfessionalService.js';
-import { ProfessionalRepository } from '../modules/professionals/repositories/ProfessionalRepository.js';
-import { ProfessionalController } from '../modules/professionals/controllers/ProfessionalController.js';
+} from '../../modules/professionals/dtos/ProfessionalDTOs.js';
+import { ProfessionalProfileBuilder } from '../../modules/professionals/builders/ProfessionalProfileBuilder.js';
+import { ProfessionalSearchQueryBuilder } from '../../modules/professionals/builders/ProfessionalSearchQueryBuilder.js';
+import { ProfessionalService } from '../../modules/professionals/services/ProfessionalService.js';
+import { ProfessionalRepository } from '../../modules/professionals/repositories/ProfessionalRepository.js';
+import { ProfessionalController } from '../../modules/professionals/controllers/ProfessionalController.js';
 import {
   IProfessionalRepository,
   IProfessionalSearchFilters,
   IProfessionalSearchResult
-} from '../modules/professionals/interfaces/IProfessionalRepository.js';
-import { ProfessionalProfileModel } from '../modules/professionals/models/ProfessionalProfileModel.js';
-import { ReviewModel } from '../modules/reviews/models/ReviewModel.js';
-import { NotFoundError, UnauthorizedError } from '../common/errors/index.js';
-import { IAuthenticatedRequest } from '../common/interfaces/index.js';
+} from '../../modules/professionals/interfaces/IProfessionalRepository.js';
+import { ProfessionalProfileModel } from '../../modules/professionals/models/ProfessionalProfileModel.js';
+import { ReviewModel } from '../../modules/reviews/models/ReviewModel.js';
+import { NotFoundError, UnauthorizedError } from '../../common/errors/index.js';
+import { IAuthenticatedRequest } from '../../common/interfaces/index.js';
 
 function createFakeProfile(overrides: Partial<ProfessionalProfileModel> = {}): ProfessionalProfileModel {
   return {
@@ -65,7 +65,7 @@ function createRepositoryStub(overrides: Partial<IProfessionalRepository> = {}):
 }
 
 afterEach(() => {
-  mock.restoreAll();
+  vi.restoreAllMocks();
 });
 
 describe('Unitario — DTOs de Prestadores (Zod)', () => {
@@ -176,7 +176,9 @@ describe('Unitario — Builders de Prestadores (casos borde y combinación de fi
 
   it('ProfessionalProfileBuilder permite desglose parcial de estrellas y delegación limpia a build()', async () => {
     const createdModel = createFakeProfile({ userId: 'u-99' });
-    const createMock = mock.method(ProfessionalProfileModel, 'create', async () => createdModel);
+    const createMock = vi
+      .spyOn(ProfessionalProfileModel, 'create')
+      .mockImplementation((async () => createdModel) as never);
 
     const result = await new ProfessionalProfileBuilder()
       .withUserId('u-99')
@@ -186,8 +188,8 @@ describe('Unitario — Builders de Prestadores (casos borde y combinación de fi
       .build();
 
     assert.equal(result, createdModel);
-    assert.equal(createMock.mock.callCount(), 1);
-    const payload = createMock.mock.calls[0].arguments[0] as unknown as Record<string, unknown>;
+    assert.equal(createMock.mock.calls.length, 1);
+    const payload = createMock.mock.calls[0][0] as unknown as Record<string, unknown>;
     assert.equal(payload.userId, 'u-99');
     assert.equal(payload.fiveStarCount, 10);
     assert.equal(payload.fourStarCount, 2);
@@ -286,10 +288,10 @@ describe('Unitario — ProfessionalService', () => {
 describe('Unitario — ProfessionalRepository', () => {
   it('search() calcula totalPages correctamente a partir de count y limit', async () => {
     const rows = [createFakeProfile({ id: 'p1' }), createFakeProfile({ id: 'p2' })];
-    mock.method(ProfessionalProfileModel, 'findAndCountAll', async () => ({
+    vi.spyOn(ProfessionalProfileModel, 'findAndCountAll').mockImplementation((async () => ({
       count: 25,
       rows
-    }));
+    })) as never);
 
     const repo = new ProfessionalRepository();
     const result = await repo.search({ page: 2, limit: 10, category: 'plomeria' });
@@ -301,20 +303,22 @@ describe('Unitario — ProfessionalRepository', () => {
     assert.equal(result.professionals.length, 2);
   });
 
-  it('recalculateRatings() resetea métricas a valores iniciales (5.0 y 0 reseñas) cuando no hay reseñas', async () => {
-    mock.method(ReviewModel, 'findAll', async () => []);
-    const updateMock = mock.method(ProfessionalProfileModel, 'update', async () => [1]);
+  it('recalculateRatings() resetea métricas a valores iniciales (null y 0 reseñas) cuando no hay reseñas', async () => {
+    vi.spyOn(ReviewModel, 'findAll').mockImplementation((async () => []) as never);
+    const updateMock = vi
+      .spyOn(ProfessionalProfileModel, 'update')
+      .mockImplementation((async () => [1]) as never);
 
     const repo = new ProfessionalRepository();
     await repo.recalculateRatings('prof-1');
 
-    assert.equal(updateMock.mock.callCount(), 1);
-    const [values, options] = updateMock.mock.calls[0].arguments as [
-      Record<string, number>,
+    assert.equal(updateMock.mock.calls.length, 1);
+    const [values, options] = updateMock.mock.calls[0] as unknown as [
+      Record<string, number | null>,
       { where: { id: string } }
     ];
     assert.deepEqual(values, {
-      ratingAverage: 5.0,
+      ratingAverage: null,
       totalReviews: 0,
       fiveStarCount: 0,
       fourStarCount: 0,
@@ -326,7 +330,7 @@ describe('Unitario — ProfessionalRepository', () => {
   });
 
   it('recalculateRatings() calcula promedio redondeado a 2 decimales y desglose exacto por estrella', async () => {
-    mock.method(ReviewModel, 'findAll', async () => [
+    vi.spyOn(ReviewModel, 'findAll').mockImplementation((async () => [
       { rating: 5 },
       { rating: 5 },
       { rating: 4 },
@@ -334,14 +338,16 @@ describe('Unitario — ProfessionalRepository', () => {
       { rating: 2 },
       { rating: 1 },
       { rating: 5 }
-    ] as ReviewModel[]);
-    const updateMock = mock.method(ProfessionalProfileModel, 'update', async () => [1]);
+    ] as ReviewModel[]) as never);
+    const updateMock = vi
+      .spyOn(ProfessionalProfileModel, 'update')
+      .mockImplementation((async () => [1]) as never);
 
     const repo = new ProfessionalRepository();
     await repo.recalculateRatings('prof-2');
 
-    assert.equal(updateMock.mock.callCount(), 1);
-    const [values] = updateMock.mock.calls[0].arguments as [Record<string, number>, unknown];
+    assert.equal(updateMock.mock.calls.length, 1);
+    const [values] = updateMock.mock.calls[0] as unknown as [Record<string, number>, unknown];
     // (5 + 5 + 4 + 3 + 2 + 1 + 5) / 7 = 25 / 7 = 3.5714... -> 3.57
     assert.equal(values.ratingAverage, 3.57);
     assert.equal(values.totalReviews, 7);
@@ -355,11 +361,11 @@ describe('Unitario — ProfessionalRepository', () => {
   it('update() retorna null si el perfil no existe o ejecuta instance.update() cuando existe', async () => {
     const repo = new ProfessionalRepository();
 
-    mock.method(ProfessionalProfileModel, 'findByPk', async () => null);
+    vi.spyOn(ProfessionalProfileModel, 'findByPk').mockImplementation((async () => null) as never);
     const notFound = await repo.update('missing-id', { zone: 'Centro' });
     assert.equal(notFound, null);
 
-    mock.restoreAll();
+    vi.restoreAllMocks();
 
     let updatedWith: unknown;
     const instanceStub = {
@@ -370,7 +376,7 @@ describe('Unitario — ProfessionalRepository', () => {
       }
     } as unknown as ProfessionalProfileModel;
 
-    mock.method(ProfessionalProfileModel, 'findByPk', async () => instanceStub);
+    vi.spyOn(ProfessionalProfileModel, 'findByPk').mockImplementation((async () => instanceStub) as never);
     const updated = await repo.update('prof-10', { zone: 'Norte' });
 
     assert.equal(updated, instanceStub);

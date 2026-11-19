@@ -1,25 +1,25 @@
-import { after, before, beforeEach, describe, it } from 'node:test';
+import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import express from 'express';
 import { AddressInfo } from 'node:net';
-import { ProfessionalRouter } from '../modules/professionals/routes/ProfessionalRouter.js';
-import { ProfessionalController } from '../modules/professionals/controllers/ProfessionalController.js';
-import { ProfessionalService } from '../modules/professionals/services/ProfessionalService.js';
+import { ProfessionalRouter } from '../../modules/professionals/routes/ProfessionalRouter.js';
+import { ProfessionalController } from '../../modules/professionals/controllers/ProfessionalController.js';
+import { ProfessionalService } from '../../modules/professionals/services/ProfessionalService.js';
 import {
   IProfessionalRepository,
   IProfessionalSearchFilters,
   IProfessionalSearchResult
-} from '../modules/professionals/interfaces/IProfessionalRepository.js';
-import { ProfessionalProfileModel } from '../modules/professionals/models/ProfessionalProfileModel.js';
-import { ProfessionalProfileBuilder } from '../modules/professionals/builders/ProfessionalProfileBuilder.js';
-import { AuthMiddleware } from '../common/middlewares/AuthMiddleware.js';
-import { ErrorHandlerMiddleware } from '../common/middlewares/ErrorHandlerMiddleware.js';
-import { TokenService } from '../common/utils/TokenService.js';
-import { ReviewService } from '../modules/reviews/services/ReviewService.js';
-import { IReviewRepository } from '../modules/reviews/interfaces/IReviewRepository.js';
-import { ReviewModel } from '../modules/reviews/models/ReviewModel.js';
-import { BadRequestError } from '../common/errors/index.js';
+} from '../../modules/professionals/interfaces/IProfessionalRepository.js';
+import { ProfessionalProfileModel } from '../../modules/professionals/models/ProfessionalProfileModel.js';
+import { ProfessionalProfileBuilder } from '../../modules/professionals/builders/ProfessionalProfileBuilder.js';
+import { AuthMiddleware } from '../../common/middlewares/AuthMiddleware.js';
+import { ErrorHandlerMiddleware } from '../../common/middlewares/ErrorHandlerMiddleware.js';
+import { TokenService } from '../../common/utils/TokenService.js';
+import { ReviewService } from '../../modules/reviews/services/ReviewService.js';
+import { IReviewRepository } from '../../modules/reviews/interfaces/IReviewRepository.js';
+import { ReviewModel } from '../../modules/reviews/models/ReviewModel.js';
+import { BadRequestError } from '../../common/errors/index.js';
 
 interface IInMemoryReview {
   id: string;
@@ -246,7 +246,7 @@ describe('Integración — Módulo de Prestadores (/api/v1/professionals)', () =
   let repository: InMemoryProfessionalRepository;
   let tokenService: TokenService;
 
-  before(async () => {
+  beforeAll(async () => {
     repository = new InMemoryProfessionalRepository();
     tokenService = new TokenService();
 
@@ -269,7 +269,7 @@ describe('Integración — Módulo de Prestadores (/api/v1/professionals)', () =
     });
   });
 
-  after(async () => {
+  afterAll(async () => {
     await new Promise<void>((resolve, reject) => {
       server.close((err) => (err ? reject(err) : resolve()));
     });
