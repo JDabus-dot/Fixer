@@ -6,6 +6,13 @@ import { CreateReviewSchema, ReplyReviewSchema } from '../dtos/ReviewDTOs.js';
 import { AsyncHandler } from '../../../common/utils/AsyncHandler.js';
 
 /**
+ * @swagger
+ * tags:
+ *   - name: Reviews
+ *     description: Gestión de reseñas y valoraciones.
+ */
+
+/**
  * Enrutador modular POO para el recurso de reseñas.
  */
 export class ReviewRouter {
@@ -21,13 +28,84 @@ export class ReviewRouter {
   }
 
   private initializeRoutes(): void {
-    // Obtener reseñas públicas de un profesional
+    /**
+     * @swagger
+     * /reviews/professional/{professionalId}:
+     *   get:
+     *     summary: Obtener las reseñas de un profesional
+     *     tags: [Reviews]
+     *     parameters:
+     *       - in: path
+     *         name: professionalId
+     *         required: true
+     *         schema: { type: string }
+     *       - in: query
+     *         name: limit
+     *         schema: { type: integer, default: 20 }
+     *       - in: query
+     *         name: offset
+     *         schema: { type: integer, default: 0 }
+     *     responses:
+     *       200:
+     *         description: Reseñas obtenidas correctamente
+     *         content:
+     *           application/json:
+     *             schema:
+     *               allOf:
+     *                 - $ref: '#/components/schemas/SuccessResponse'
+     *                 - type: object
+     *                   properties:
+     *                     data:
+     *                       type: array
+     *                       items: { type: object }
+     */
     this.router.get(
       '/professional/:professionalId',
       AsyncHandler.wrap(this.reviewController.getByProfessional)
     );
 
-    // Publicar una nueva reseña (cliente autenticado)
+    /**
+     * @swagger
+     * /reviews:
+     *   post:
+     *     summary: Publicar una reseña
+     *     description: Actualiza las valoraciones del profesional. No permite calificar el perfil propio.
+     *     tags: [Reviews]
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required: [professionalId, rating, serviceType, comment]
+     *             properties:
+     *               professionalId: { type: string, format: uuid }
+     *               rating: { type: integer, minimum: 1, maximum: 5 }
+     *               serviceType: { type: string, minLength: 3 }
+     *               comment: { type: string, minLength: 20 }
+     *               isVerifiedVisit: { type: boolean, default: true }
+     *     responses:
+     *       201:
+     *         description: Reseña publicada exitosamente
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/SuccessResponse'
+     *       400:
+     *         description: No se permite publicar una reseña en el perfil propio
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     *       401:
+     *         $ref: '#/components/responses/Unauthorized'
+     *       404:
+     *         $ref: '#/components/responses/NotFound'
+     *       422:
+     *         $ref: '#/components/responses/ValidationError'
+     */
     this.router.post(
       '/',
       this.authMiddleware.authenticate,
@@ -35,7 +113,46 @@ export class ReviewRouter {
       AsyncHandler.wrap(this.reviewController.create)
     );
 
-    // Responder a una reseña (profesional autenticado)
+    /**
+     * @swagger
+     * /reviews/{id}/reply:
+     *   patch:
+     *     summary: Responder a una reseña
+     *     description: Requiere rol PROFESSIONAL o ADMIN y ser el propietario del perfil evaluado.
+     *     tags: [Reviews]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema: { type: string }
+     *         description: ID de la reseña
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required: [reply]
+     *             properties:
+     *               reply: { type: string, minLength: 3 }
+     *     responses:
+     *       200:
+     *         description: Respuesta a la reseña guardada exitosamente
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/SuccessResponse'
+     *       401:
+     *         $ref: '#/components/responses/Unauthorized'
+     *       403:
+     *         $ref: '#/components/responses/Forbidden'
+     *       404:
+     *         $ref: '#/components/responses/NotFound'
+     *       422:
+     *         $ref: '#/components/responses/ValidationError'
+     */
     this.router.patch(
       '/:id/reply',
       this.authMiddleware.authenticate,

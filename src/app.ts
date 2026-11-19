@@ -2,6 +2,8 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/SwaggerConfig.js';
 import { EnvConfig } from './config/EnvConfig.js';
 import { ErrorHandlerMiddleware } from './common/middlewares/ErrorHandlerMiddleware.js';
 import { ApiResponseHelper } from './common/utils/ApiResponseHelper.js';
@@ -55,6 +57,7 @@ export class App {
   ) {
     this.app = express();
     this.setupMiddlewares();
+    this.setupSwagger();
     this.setupRoutes();
     this.setupErrorHandling();
   }
@@ -70,6 +73,14 @@ export class App {
     this.app.use(morgan(EnvConfig.NODE_ENV === 'production' ? 'combined' : 'dev'));
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true }));
+  }
+
+  private setupSwagger(): void {
+    this.app.use(
+      '/api-docs',
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerSpec)
+    );
   }
 
   private setupRoutes(): void {
@@ -101,6 +112,16 @@ export class App {
     const serviceRequestRouter = new ServiceRequestRouter(serviceRequestController, authMiddleware);
 
     // 2. Ruta de Salud / Healthcheck para Docker y monitoreo
+    /**
+     * @swagger
+     * /health:
+     *   get:
+     *     summary: Verificar el estado de la API
+     *     tags: [Health]
+     *     responses:
+     *       200:
+     *         description: API disponible
+     */
     this.app.get('/api/v1/health', (_req: Request, res: Response) => {
       ApiResponseHelper.success(
         res,
