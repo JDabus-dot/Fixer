@@ -1,6 +1,6 @@
 # Documentación Técnica — Módulo de Prestadores (Professionals)
 
-Este documento describe la arquitectura, diseño de datos, contratos de validación, endpoints REST, integraciones inter-módulos y estrategia de pruebas del backend correspondiente al dominio de **Prestadores** (`src/modules/professionals/`) dentro de la API **Fixer Trades Marketplace**.
+Este documento describe la arquitectura, diseño de datos, contratos de validación, endpoints REST, integraciones inter-módulos y estrategia de pruebas del backend correspondiente al dominio de **Prestadores** (`src/modules/professionals/`) dentro de la API **Fixer**.
 
 ---
 
