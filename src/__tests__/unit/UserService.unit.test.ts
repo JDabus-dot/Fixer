@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { UserService } from '../../modules/users/services/UserService.js';
 import type { IUserRepository } from '../../modules/users/interfaces/IUserRepository.js';
 import type { UserModel } from '../../modules/users/models/UserModel.js';
@@ -10,11 +9,11 @@ describe('UserService - Tests unitarios', () => {
 
   const user = {
     id: userId,
-    fullName: 'Juan Martínez',
-    email: 'juan@example.com',
+    fullName: 'Juan MartÃ­nez',
+    email: 'juan.martinez@example.com',
     phone: '+5491122334455',
     role: 'CLIENT',
-    securityQuestion: '¿Ciudad natal?',
+    securityQuestion: 'Â¿Ciudad natal?',
     avatarUrl: null,
     termsAccepted: true,
     isActive: true
@@ -48,7 +47,9 @@ describe('UserService - Tests unitarios', () => {
     service = new UserService(userRepository as unknown as IUserRepository);
   });
 
+  // getProfile: obtener el perfil de un usuario por ID.
   describe('getProfile', () => {
+    // El usuario existe: se devuelve el usuario consultado.
     it('devuelve el usuario cuando existe', async () => {
       const result = await service.getProfile(userId);
 
@@ -57,6 +58,7 @@ describe('UserService - Tests unitarios', () => {
       expect(result).toBe(user);
     });
 
+    // El usuario no existe: NotFoundError (traducido a 404).
     it('lanza NotFoundError cuando el usuario no existe', async () => {
       userRepository.findById.mockResolvedValue(null);
 
@@ -67,13 +69,15 @@ describe('UserService - Tests unitarios', () => {
     });
   });
 
+  // updateProfile: actualizar el perfil de un usuario existente.
   describe('updateProfile', () => {
     const dto = {
-      fullName: 'Juan Martínez Actualizado',
+      fullName: 'Juan MartÃ­nez Actualizado',
       phone: '+5491199999999',
       avatarUrl: 'https://cdn.fixer.com/avatar.png'
     };
 
+    // El usuario existe: se actualiza y se devuelve el actualizado.
     it('actualiza y devuelve el usuario cuando existe', async () => {
       const updatedUser = { ...user, ...dto } as unknown as UserModel;
       userRepository.update.mockResolvedValue(updatedUser);
@@ -86,12 +90,14 @@ describe('UserService - Tests unitarios', () => {
       expect(result).toBe(updatedUser);
     });
 
+
     it('pasa el DTO tal cual al repository.update', async () => {
       await service.updateProfile(userId, dto);
 
       expect(userRepository.update).toHaveBeenCalledWith(userId, dto);
     });
 
+    // Usuario inexistente : no se actualiza.
     it('lanza NotFoundError cuando el usuario no existe', async () => {
       userRepository.findById.mockResolvedValue(null);
 

@@ -50,14 +50,23 @@ backend/
 │   │   ├── professionals/             # Búsqueda, filtros por oficio/zona y perfil Pro
 │   │   ├── reviews/                   # Calificaciones, reseñas y respuestas del profesional
 │   │   └── service-requests/          # Solicitudes de servicio, urgencias y presupuestos
+│   ├── __tests__/                     # Suite de tests (Vitest + node:test)
+│   │   ├── unit/                      # Tests unitarios por capa
+│   │   ├── integration/               # Tests de integración (Supertest, Sequelize mockeado)
+│   │   ├── fixtures/                  # Datos de prueba reutilizables
+│   │   └── creational-patterns.test.ts # Tests legacy de patrones (node:test)
 │   ├── app.ts                         # Clase App de Express
 │   └── server.ts                      # Clase Server y punto de entrada
+├── docs/                              # Documentación técnica por módulo
+│   ├── decisiones-diseno/             # Diagramas, ADRs y documentación de diseño
+│   ├── users/                         # Documentación del módulo Usuarios
+│   ├── reviews/                       # (futuro) Documentación del módulo Reseñas
+│   └── professionals/                 # (futuro) Documentación del módulo Profesionales
 ├── Dockerfile                         # Multi-stage build optimizado
 ├── compose.yml                        # Orquestación de Postgres y Backend
 ├── package.json
 └── tsconfig.json
-```
-
+````
 ---
 
 ## 🗄️ Modelo de Datos y Entidades
@@ -72,6 +81,53 @@ backend/
    - Orden de trabajo o cotización enviada por un cliente a un profesional con estado (`PENDING`, `ACCEPTED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`), urgencia y presupuesto estimado.
 
 ---
+## 🧪 Tests
+
+El proyecto usa **Vitest** para unitarios e integración, y **node:test** para los tests legacy de patrones creacionales.
+
+### Cobertura por módulo
+
+| Módulo | Unitarios | Integración | Total | Runner |
+| :--- | :---: | :---: | :---: | :--- |
+| **Usuarios** | 9 | 19 | **28** | Vitest |
+| **Reseñas** | 6 | 2 | **8** | Vitest |
+| **Profesionales** | 2 | — | **2** | Vitest |
+| **Patrones creacionales** | 12 | — | **12** | node:test (legacy) |
+| **Total** | **29** | **21** | **50** | |
+
+
+### Cómo correr los tests
+
+```bash
+# Todos los tests de Vitest (unit + integración)
+pnpm test
+
+# Solo unitarios
+pnpm test:unit
+
+# Solo integración
+pnpm test:integration
+
+# Modo watch (desarrollo)
+pnpm test:watch
+
+# Tests legacy de patrones creacionales (node:test)
+pnpm test:legacy
+
+# Un archivo específico
+pnpm exec vitest run src/__tests__/unit/UserService.unit.test.ts
+```
+---
+
+## 📚 Documentación de Módulos
+
+Cada módulo de dominio tiene su propia documentación técnica detallada (arquitectura, contrato de repositorio, reglas de negocio, endpoints y tests).
+
+| Módulo | Documentación | Tests |
+| :--- | :--- | :---: |
+| **Usuarios** | [`docs/users/README.md`](docs/users/README.md) | 28 |
+| **Reseñas** | _Pendiente_ (`docs/reviews/README.md`) | 8 |
+| **Profesionales** | _Pendiente_ (`docs/professionals/README.md`) | 2 |
 
 ## 🚀 Puesta en Marcha con Docker y Docker Compose
 
@@ -205,5 +261,6 @@ correspondiente.
 - `PATCH /:id/status`: Cambiar estado (`PENDING`, `ACCEPTED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`).
 
 ### 5. Usuarios (`/api/v1/users`)
+📖 Documentación completa: docs/users/README.md
 - `GET /me`: Datos del perfil del usuario logueado.
 - `PATCH /me`: Modificar nombre, teléfono o avatar.
