@@ -191,4 +191,33 @@ describe('Unitario — ServiceRequestService', () => {
     assert.equal(created.isUrgent, true);
     assert.equal(created.title, '[URGENTE] Instalación de termotanque');
   });
+
+  it('U5: getMyRequestsAsProfessional() resuelve userId a profile.id o lanza NotFoundError si no posee perfil', async () => {
+    let queriedProId: string | undefined;
+    const expectedList = [{ id: 'req-10', professionalId: 'prof-42' } as ServiceRequestModel];
+
+    const service = new ServiceRequestService(
+      createRequestRepoStub({
+        findByProfessionalId: async (proId) => {
+          queriedProId = proId;
+          return expectedList;
+        }
+      }),
+      createProfessionalRepoStub({
+        findByUserId: async (userId) =>
+          userId === 'user-pro-42'
+            ? ({ id: 'prof-42', userId: 'user-pro-42' } as ProfessionalProfileModel)
+            : null
+      })
+    );
+
+    const list = await service.getMyRequestsAsProfessional('user-pro-42');
+    assert.equal(queriedProId, 'prof-42');
+    assert.equal(list, expectedList);
+
+    await assert.rejects(
+      () => service.getMyRequestsAsProfessional('user-sin-perfil'),
+      (err: unknown) => err instanceof NotFoundError && err.statusCode === 404
+    );
+  });
 });
