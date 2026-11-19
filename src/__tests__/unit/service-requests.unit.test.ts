@@ -1,6 +1,9 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
-import { CreateServiceRequestSchema } from '../../modules/service-requests/dtos/ServiceRequestDTOs.js';
+import {
+  CreateServiceRequestSchema,
+  UpdateRequestStatusSchema
+} from '../../modules/service-requests/dtos/ServiceRequestDTOs.js';
 
 const VALID_PROFESSIONAL_ID = '550e8400-e29b-41d4-a716-446655440000';
 
@@ -43,5 +46,18 @@ describe('Unitario — DTOs de Solicitudes de Servicio (Zod)', () => {
         'zone'
       ]);
     }
+  });
+
+  it('U2: UpdateRequestStatusSchema acepta únicamente los estados válidos del contrato y reason opcional', () => {
+    const valid = UpdateRequestStatusSchema.safeParse({
+      status: 'CANCELLED',
+      reason: 'El cliente reprogramó la visita'
+    });
+    assert.equal(valid.success, true);
+
+    const invalid = UpdateRequestStatusSchema.safeParse({
+      status: 'REJECTED'
+    });
+    assert.equal(invalid.success, false);
   });
 });
