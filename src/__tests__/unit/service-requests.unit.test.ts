@@ -4,6 +4,11 @@ import {
   CreateServiceRequestSchema,
   UpdateRequestStatusSchema
 } from '../../modules/service-requests/dtos/ServiceRequestDTOs.js';
+import {
+  ServiceRequestFactory,
+  StandardServiceRequestCreator,
+  UrgentServiceRequestCreator
+} from '../../modules/service-requests/factories/ServiceRequestFactory.js';
 
 const VALID_PROFESSIONAL_ID = '550e8400-e29b-41d4-a716-446655440000';
 
@@ -59,5 +64,45 @@ describe('Unitario — DTOs de Solicitudes de Servicio (Zod)', () => {
       status: 'REJECTED'
     });
     assert.equal(invalid.success, false);
+  });
+});
+
+describe('Unitario — ServiceRequestFactory (Factory Method)', () => {
+  it('U3: ServiceRequestFactory selecciona Standard o Urgent creator, asigna defaults y evita duplicar el prefijo [URGENTE]', () => {
+    const baseDto = {
+      professionalId: VALID_PROFESSIONAL_ID,
+      title: 'Corte general en tablero',
+      description: 'Saltó el disyuntor diferencial y no vuelve a levantar.',
+      category: 'electricidad',
+      serviceAddress: 'San Martín 228',
+      zone: 'Centro',
+      isUrgent: false
+    };
+
+    const standardCreator = ServiceRequestFactory.getCreator(false);
+    assert.ok(standardCreator instanceof StandardServiceRequestCreator);
+    const standardAttrs = standardCreator.buildCreationAttributes('client-1', baseDto);
+    assert.equal(standardAttrs.isUrgent, false);
+    assert.equal(standardAttrs.title, 'Corte general en tablero');
+    assert.equal(standardAttrs.scheduledDate, null);
+    assert.equal(standardAttrs.status, 'PENDING');
+
+    const urgentCreator = ServiceRequestFactory.getCreator(true);
+    assert.ok(urgentCreator instanceof UrgentServiceRequestCreator);
+    const urgentAttrs = urgentCreator.buildCreationAttributes('client-1', {
+      ...baseDto,
+      isUrgent: true
+    });
+    assert.equal(urgentAttrs.isUrgent, true);
+    assert.equal(urgentAttrs.title, '[URGENTE] Corte general en tablero');
+    assert.ok(urgentAttrs.scheduledDate instanceof Date);
+    assert.equal(urgentAttrs.status, 'PENDING');
+
+    const alreadyPrefixed = urgentCreator.buildCreationAttributes('client-1', {
+      ...baseDto,
+      title: '[URGENTE] Corte general en tablero',
+      isUrgent: true
+    });
+    assert.equal(alreadyPrefixed.title, '[URGENTE] Corte general en tablero');
   });
 });
