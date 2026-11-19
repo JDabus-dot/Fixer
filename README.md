@@ -32,7 +32,9 @@ Diseñado estrictamente con **Programación Orientada a Objetos (POO)**, princip
 ```text
 backend/
 ├── src/
-│   ├── config/                        # Variables de entorno tipadas (EnvConfig)
+│   ├── config/  # Variables de entorno y configuración de Swagger
+│   │   ├── EnvConfig.ts
+│   │   └── SwaggerConfig.ts
 │   ├── database/                      # Conexión Singleton Sequelize, relaciones y Seeders
 │   │   ├── DatabaseConnection.ts
 │   │   ├── ModelRegistry.ts
@@ -89,10 +91,9 @@ El proyecto usa **Vitest** para unitarios e integración, y **node:test** para l
 | :--- | :---: | :---: | :---: | :--- |
 | **Usuarios** | 9 | 19 | **28** | Vitest |
 | **Reseñas** | 6 | 2 | **8** | Vitest |
-| **Profesionales** | 2 | — | **2** | Vitest |
+| **Profesionales** | 20 | 6 | **26** | Vitest |
 | **Patrones creacionales** | 12 | — | **12** | node:test (legacy) |
-| **Total** | **29** | **21** | **50** | |
-
+| **Total** | **35** | **27** | **74** | |
 
 ### Cómo correr los tests
 
@@ -116,7 +117,6 @@ pnpm test:legacy
 pnpm exec vitest run src/__tests__/unit/UserService.unit.test.ts
 ```
 ---
-
 ## 📚 Documentación de Módulos
 
 Cada módulo de dominio tiene su propia documentación técnica detallada (arquitectura, contrato de repositorio, reglas de negocio, endpoints y tests).
@@ -125,7 +125,7 @@ Cada módulo de dominio tiene su propia documentación técnica detallada (arqui
 | :--- | :--- | :---: |
 | **Usuarios** | [`docs/users/README.md`](docs/users/README.md) | 28 |
 | **Reseñas** | _Pendiente_ (`docs/reviews/README.md`) | 8 |
-| **Profesionales** | _Pendiente_ (`docs/professionals/README.md`) | 2 |
+| **Profesionales** | _Pendiente_ (`docs/professionals/README.md`) | 26 |
 
 ## 🚀 Puesta en Marcha con Docker y Docker Compose
 
@@ -185,6 +185,43 @@ curl http://localhost:3000/api/v1/health
 | **Profesional** | Mariana Vázquez | `mariana.vazquez@fixerservices.com` | `Password123!` | Pintura & Acabados |
 | **Cliente** | Javier Rossi | `javier.rossi@ejemplo.com` | `Password123!` | Cliente verificado con reseña |
 | **Cliente** | Martina Gómez | `martina@ejemplo.com` | `Password123!` | Cliente de prueba para nuevas contrataciones |
+
+---
+## 📖 Documentación interactiva de la API (Swagger)
+
+La API cuenta con documentación interactiva bajo el estándar OpenAPI 3.0,
+implementada mediante `swagger-jsdoc` y `swagger-ui-express`.
+
+Una vez iniciado el backend, tanto de forma local como mediante Docker,
+la documentación está disponible en:
+
+http://localhost:3000/api-docs
+
+### Funcionalidades
+
+- Documentación de los 18 endpoints de la API.
+- Visualización de parámetros y cuerpos de las peticiones.
+- Códigos de respuesta HTTP.
+- Ejecución de peticiones desde el navegador mediante Try it out.
+- Autenticación JWT para endpoints protegidos.
+
+### Autenticación desde Swagger
+
+1. Ejecutar `POST /auth/login` con las credenciales de un usuario registrado.
+2. Copiar el token JWT retornado en `data.token`.
+3. Presionar el botón **Authorize**.
+4. Pegar el token sin el prefijo `Bearer`.
+5. Ejecutar los endpoints protegidos.
+
+### Mantenimiento
+
+La configuración centralizada se encuentra en `src/config/SwaggerConfig.ts`.
+La documentación de los endpoints se define mediante anotaciones JSDoc
+en los routers de cada módulo, a excepción del endpoint Health,
+documentado en `app.ts`.
+
+Al agregar o modificar un endpoint, se debe actualizar su documentación
+correspondiente.
 
 ---
 
