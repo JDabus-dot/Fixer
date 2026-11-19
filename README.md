@@ -91,10 +91,9 @@ El proyecto usa **Vitest** para unitarios e integración, y **node:test** para l
 | :--- | :---: | :---: | :---: | :--- |
 | **Usuarios** | 9 | 19 | **28** | Vitest |
 | **Reseñas** | 6 | 2 | **8** | Vitest |
-| **Profesionales** | 2 | — | **2** | Vitest |
+| **Profesionales** | 20 | 6 | **26** | Vitest |
 | **Patrones creacionales** | 12 | — | **12** | node:test (legacy) |
-| **Total** | **29** | **21** | **50** | |
-
+| **Total** | **35** | **27** | **74** | |
 
 ### Cómo correr los tests
 
@@ -118,7 +117,6 @@ pnpm test:legacy
 pnpm exec vitest run src/__tests__/unit/UserService.unit.test.ts
 ```
 ---
-
 ## 📚 Documentación de Módulos
 
 Cada módulo de dominio tiene su propia documentación técnica detallada (arquitectura, contrato de repositorio, reglas de negocio, endpoints y tests).
@@ -127,7 +125,7 @@ Cada módulo de dominio tiene su propia documentación técnica detallada (arqui
 | :--- | :--- | :---: |
 | **Usuarios** | [`docs/users/README.md`](docs/users/README.md) | 28 |
 | **Reseñas** | _Pendiente_ (`docs/reviews/README.md`) | 8 |
-| **Profesionales** | _Pendiente_ (`docs/professionals/README.md`) | 2 |
+| **Profesionales** | _Pendiente_ (`docs/professionals/README.md`) | 26 |
 
 ## 🚀 Puesta en Marcha con Docker y Docker Compose
 
