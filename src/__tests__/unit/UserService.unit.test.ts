@@ -36,7 +36,7 @@ describe('UserService - Tests unitarios', () => {
       await expect(service.getProfile('missing')).rejects.toBeInstanceOf(NotFoundError);
     });
   });
-
+  //Actualiza solo si el usuario existe
   describe('updateProfile', () => {
     it('lanza NotFoundError y NO actualiza si no existe', async () => {
       userRepository.findById.mockResolvedValue(null);

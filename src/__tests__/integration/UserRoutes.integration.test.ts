@@ -25,7 +25,7 @@ describe('UserRoutes - Integración HTTP (Supertest)', () => {
     validToken = new TokenService().generateToken(authPayload);
     app = buildApp();
   });
-
+//Se cubren los dos endopoints de usuario: GET y PATCH
   describe('GET /api/v1/users/me', () => {
     //sin token
     it('responde 401 si no se envía token', async () => {
@@ -48,6 +48,7 @@ describe('UserRoutes - Integración HTTP (Supertest)', () => {
   });
 
   describe('PATCH /api/v1/users/me', () => {
+    //Evita datos basura en la BDD
     it('responde 422 si el body es inválido', async () => {
       const res = await request(app).patch('/api/v1/users/me').set('Authorization', `Bearer ${validToken}`).send({ fullName: 'A' });
       expect(res.status).toBe(422);
