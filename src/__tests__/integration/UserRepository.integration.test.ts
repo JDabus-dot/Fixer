@@ -18,7 +18,7 @@ describe('UserRepository - Integración (persistencia mockeada)', () => {
     vi.clearAllMocks();
     repository = new UserRepository();
   });
-
+  //Asegura capa de persistencia excluye hashes de contraseña y respuesta secreta
   describe('findById', () => {
     it('excluye hashes e incluye perfil', async () => {
       vi.mocked(UserModel.findByPk).mockResolvedValue(user);
@@ -26,7 +26,7 @@ describe('UserRepository - Integración (persistencia mockeada)', () => {
       expect(UserModel.findByPk).toHaveBeenCalledWith(userId, expect.objectContaining({ attributes: excludeSensitive }));
     });
   });
-
+  // normaliza el email
   describe('findByEmail', () => {
     it('normaliza el email antes de buscar', async () => {
       vi.mocked(UserModel.findOne).mockResolvedValue(user);
@@ -34,7 +34,7 @@ describe('UserRepository - Integración (persistencia mockeada)', () => {
       expect(UserModel.findOne).toHaveBeenCalledWith(expect.objectContaining({ where: { email: 'juan@example.com' } }));
     });
   });
-
+  //verifica que no se excluyan hashes y falle silenciosamente si no encuentra el usuario
   describe('findByEmailWithPassword', () => {
     it('NO excluye hashes', async () => {
       vi.mocked(UserModel.findOne).mockResolvedValue(user);
