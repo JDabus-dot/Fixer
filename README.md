@@ -7,7 +7,7 @@ Backend RESTful para la plataforma **Fixer Trades Marketplace**, construido con 
 ## 📂 Estructura de Carpetas Modular (MVC)
 
 ```text
-backend/
+
 ├── src/
 │   ├── config/                        # Variables de entorno y configuración de Swagger
 │   │   ├── EnvConfig.ts
@@ -28,6 +28,7 @@ backend/
 │   │   ├── reviews/                   # Calificaciones, reseñas y respuestas del profesional
 │   │   └── service-requests/          # Solicitudes de servicio, urgencias y presupuestos
 │   ├── __tests__/                     # Suite de tests (Vitest)
+|   |   ├── e2e/                       # Test e2e
 │   │   ├── unit/                      # Tests unitarios por capa
 │   │   ├── integration/               # Tests de integración (Supertest, Sequelize mockeado)
 │   │   └── fixtures/                  # Datos de prueba reutilizables
@@ -108,7 +109,14 @@ pnpm test:watch
 
 # Un archivo específico
 pnpm exec vitest run src/__tests__/unit/AuthService.unit.test.ts
+
+# e2e 
+pnpm test:e2e
+
+# coverage
+pnpm test:coverage
 ```
+
 
 ---
 
@@ -117,7 +125,7 @@ pnpm exec vitest run src/__tests__/unit/AuthService.unit.test.ts
 La forma más rápida y recomendada es utilizar Docker Compose:
 
 ```bash
-# Desde la raíz del repositorio o dentro de backend/
+# Desde la raíz del repositorio/
 docker compose up --build
 ```
 
@@ -141,8 +149,7 @@ curl http://localhost:3000/api/v1/health
 ### Pasos
 1. Instalar dependencias:
    ```bash
-   cd backend
-   npm install
+   pnpm install
    ```
 2. Configurar variables de entorno:
    ```bash
@@ -151,12 +158,12 @@ curl http://localhost:3000/api/v1/health
    ```
 3. Ejecutar en modo desarrollo con recarga en vivo:
    ```bash
-   npm run dev
+   pnpm run dev
    ```
 4. Compilar para producción:
    ```bash
-   npm run build
-   npm start
+   pnpm run build
+   pnpm start
    ```
 
 ---
