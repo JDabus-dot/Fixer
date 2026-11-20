@@ -1,141 +1,142 @@
-# ðŸ”¨ Fixer Trades Marketplace - Backend API
+# 🔨 Fixer Trades Marketplace - Backend API
 
 Backend RESTful para la plataforma **Fixer Trades Marketplace**, construido con **Node.js, TypeScript, Express, PostgreSQL y Sequelize** bajo **POO, SOLID, Clean Code y MVC Modular**.
 
 ---
 
-## ðŸ“‚ Estructura de Carpetas Modular (MVC)
+## 📂 Estructura de Carpetas Modular (MVC)
 
 ```text
 backend/
-â”œâ”€â”€ src/
-â”‚   â”œâ”€â”€ config/                        # Variables de entorno y configuraciÃ³n de Swagger
-â”‚   â”‚   â”œâ”€â”€ EnvConfig.ts
-â”‚   â”‚   â””â”€â”€ SwaggerConfig.ts
-â”‚   â”œâ”€â”€ database/                      # ConexiÃ³n Singleton Sequelize, relaciones y Seeders
-â”‚   â”‚   â”œâ”€â”€ DatabaseConnection.ts
-â”‚   â”‚   â”œâ”€â”€ ModelRegistry.ts
-â”‚   â”‚   â””â”€â”€ DatabaseSeeder.ts
-â”‚   â”œâ”€â”€ common/                        # Recursos compartidos transversales
-â”‚   â”‚   â”œâ”€â”€ errors/                    # JerarquÃ­a de errores POO (AppError, NotFoundError, etc.)
-â”‚   â”‚   â”œâ”€â”€ interfaces/                # Interfaces genÃ©ricas (IBaseRepository, IApiResponse)
-â”‚   â”‚   â”œâ”€â”€ middlewares/               # AuthMiddleware, ValidationMiddleware, ErrorHandler
-â”‚   â”‚   â””â”€â”€ utils/                     # ApiResponseHelper, PasswordHasher, TokenService
-â”‚   â”œâ”€â”€ modules/                       # MÃ³dulos de dominio desacoplados
-â”‚   â”‚   â”œâ”€â”€ auth/                      # Registro, Login y RecuperaciÃ³n de ContraseÃ±a
-â”‚   â”‚   â”œâ”€â”€ users/                     # Perfil y gestiÃ³n de usuarios
-â”‚   â”‚   â”œâ”€â”€ professionals/             # BÃºsqueda, filtros por oficio/zona y perfil Pro
-â”‚   â”‚   â”œâ”€â”€ reviews/                   # Calificaciones, reseÃ±as y respuestas del profesional
-â”‚   â”‚   â””â”€â”€ service-requests/          # Solicitudes de servicio, urgencias y presupuestos
-â”‚   â”œâ”€â”€ __tests__/                     # Suite de tests (Vitest)
-â”‚   â”‚   â”œâ”€â”€ unit/                      # Tests unitarios por capa
-â”‚   â”‚   â”œâ”€â”€ integration/               # Tests de integraciÃ³n (Supertest, Sequelize mockeado)
-â”‚   â”‚   â””â”€â”€ fixtures/                  # Datos de prueba reutilizables
-â”‚   â”œâ”€â”€ app.ts                         # Clase App de Express
-â”‚   â””â”€â”€ server.ts                      # Clase Server y punto de entrada
-â”œâ”€â”€ docs/                              # DocumentaciÃ³n tÃ©cnica por mÃ³dulo
-â”‚   â”œâ”€â”€ decisiones-diseno/             # Diagramas, ADRs y documentaciÃ³n de diseÃ±o
-â”‚   â”œâ”€â”€ users/                         # DocumentaciÃ³n del mÃ³dulo Usuarios
-â”‚   â”œâ”€â”€ auth/                          # DocumentaciÃ³n del mÃ³dulo Auth
-â”‚   â”œâ”€â”€ reviews/                       # (futuro) DocumentaciÃ³n del mÃ³dulo ReseÃ±as
-â”‚   â”œâ”€â”€ professionals/                 # (futuro) DocumentaciÃ³n del mÃ³dulo Profesionales
-â”‚   â””â”€â”€ service-requests/              # (futuro) DocumentaciÃ³n del mÃ³dulo Service Requests
-â”œâ”€â”€ Dockerfile                         # Multi-stage build optimizado
-â”œâ”€â”€ compose.yml                        # OrquestaciÃ³n de Postgres y Backend
-â”œâ”€â”€ package.json
-â””â”€â”€ tsconfig.json
-
+├── src/
+│   ├── config/                        # Variables de entorno y configuración de Swagger
+│   │   ├── EnvConfig.ts
+│   │   └── SwaggerConfig.ts
+│   ├── database/                      # Conexión Singleton Sequelize, relaciones y Seeders
+│   │   ├── DatabaseConnection.ts
+│   │   ├── ModelRegistry.ts
+│   │   └── DatabaseSeeder.ts
+│   ├── common/                        # Recursos compartidos transversales
+│   │   ├── errors/                    # Jerarquía de errores POO (AppError, NotFoundError, etc.)
+│   │   ├── interfaces/                # Interfaces genéricas (IBaseRepository, IApiResponse)
+│   │   ├── middlewares/               # AuthMiddleware, ValidationMiddleware, ErrorHandler
+│   │   └── utils/                     # ApiResponseHelper, PasswordHasher, TokenService
+│   ├── modules/                       # Módulos de dominio desacoplados
+│   │   ├── auth/                      # Registro, Login y Recuperación de Contraseña
+│   │   ├── users/                     # Perfil y gestión de usuarios
+│   │   ├── professionals/             # Búsqueda, filtros por oficio/zona y perfil Pro
+│   │   ├── reviews/                   # Calificaciones, reseñas y respuestas del profesional
+│   │   └── service-requests/          # Solicitudes de servicio, urgencias y presupuestos
+│   ├── __tests__/                     # Suite de tests (Vitest)
+│   │   ├── unit/                      # Tests unitarios por capa
+│   │   ├── integration/               # Tests de integración (Supertest, Sequelize mockeado)
+│   │   └── fixtures/                  # Datos de prueba reutilizables
+│   ├── app.ts                         # Clase App de Express
+│   └── server.ts                      # Clase Server y punto de entrada
+├── docs/                              # Documentación técnica por módulo
+│   ├── decisiones-diseno.md           # Decisiones de diseño (Factory Method y Builder)
+│   ├── dabus-users.md                 # Documentación del módulo Usuarios
+│   ├── dabus-auth.md                  # Documentación del módulo Auth
+│   ├── belardinelli-reviews.md        # Documentación del módulo Reseñas
+│   ├── baldres-professional.md        # Documentación del módulo Profesionales
+│   └── baldres-service-request.md     # Documentación del módulo Service Requests
+├── Dockerfile                         # Multi-stage build optimizado
+├── compose.yml                        # Orquestación de Postgres y Backend
+├── package.json
+└── tsconfig.json
 ```
+
 ---
 
-## ðŸ—„ï¸ Entidades
+## 🗄️ Entidades
 
-| Entidad | Tabla | PropÃ³sito |
+| Entidad | Tabla | Propósito |
 | :--- | :--- | :--- |
 | `User` | `users` | Identidad, roles (`CLIENT`, `PROFESSIONAL`, `ADMIN`), credenciales con hash, pregunta secreta. |
-| `ProfessionalProfile` | `professional_profiles` | Oficio, matrÃ­cula, zona, cobertura, tarifas, rating promedio y desglose de estrellas. |
-| `Review` | `reviews` | CalificaciÃ³n 1â€“5, comentario, badge verificado, respuesta del profesional. |
-| `ServiceRequest` | `service_requests` | Orden de trabajo con estado (`PENDING` â†’ `COMPLETED`), urgencia y presupuesto. |
-|`Auth`| `auth`|  Gestiona registro, login con JWT y recuperaciÃ³n de contraseÃ±a mediante pregunta/respuesta secreta.
+| `ProfessionalProfile` | `professional_profiles` | Oficio, matrícula, zona, cobertura, tarifas, rating promedio y desglose de estrellas. |
+| `Review` | `reviews` | Calificación 1–5, comentario, badge verificado, respuesta del profesional. |
+| `ServiceRequest` | `service_requests` | Orden de trabajo con estado (`PENDING` → `COMPLETED`), urgencia y presupuesto. |
+
+> El módulo **Auth** (registro, login con JWT y recuperación de contraseña mediante pregunta/respuesta secreta) no tiene tabla propia: opera sobre `users` y `professional_profiles`.
 
 ---
-## ðŸ“š DocumentaciÃ³n de MÃ³dulos
 
-Cada mÃ³dulo de dominio tiene su propia documentaciÃ³n tÃ©cnica detallada (arquitectura, contrato de repositorio, reglas de negocio, endpoints y tests).
+## 📚 Documentación de Módulos
 
-| MÃ³dulo | DocumentaciÃ³n | Tests |
+Cada módulo de dominio tiene su propia documentación técnica detallada (arquitectura, contrato de repositorio, reglas de negocio, endpoints y tests).
+
+| Módulo | Documentación | Tests |
 | :--- | :--- | :---: |
 | Usuarios | [`docs/dabus-users.md`](docs/dabus-users.md) | 14 |
 | Auth | [`docs/dabus-auth.md`](docs/dabus-auth.md) | 11 |
-| ReseÃ±as | Pendiente (`docs/reviews/README.md`) | 8 |
+| Reseñas | [`docs/belardinelli-reviews.md`](docs/belardinelli-reviews.md) | 8 |
 | Profesionales | [`docs/baldres-professional.md`](docs/baldres-professional.md) | 26 |
 | Service Requests | [`docs/baldres-service-request.md`](docs/baldres-service-request.md) | 10 |
-
 ---
 
-## ðŸ§ª Tests
+## 🧪 Tests
 
-El proyecto usa **Vitest** para unitarios e integraciÃ³n.
+El proyecto usa **Vitest** para unitarios e integración.
 
-### Cobertura por mÃ³dulo
+### Cobertura por módulo
 
-| MÃ³dulo | Unitarios | IntegraciÃ³n | Total | Runner |
+| Módulo | Unitarios | Integración | Total | Runner |
 | :--- | :---: | :---: | :---: | :--- |
 | **Usuarios** | 5 | 9 | **14** | Vitest |
 | **Auth** | 8 | 3 | **11** | Vitest |
-| **ReseÃ±as** | 6 | 2 | **8** | Vitest |
+| **Reseñas** | 6 | 2 | **8** | Vitest |
 | **Profesionales** | 20 | 6 | **26** | Vitest |
 | **Service Requests** | 7 | 3 | **10** | Vitest |
 | **Total** | **46** | **23** | **69** | |
 
-> â„¹ï¸ **Nota:** la suite de tests se enfoca en los **caminos crÃ­ticos** (seguridad, validaciÃ³n de entrada, errores de negocio y flujos HTTP principales) para garantizar la calidad sin sobredimensionar el mantenimiento.
+> ℹ️ **Nota:** la suite de tests se enfoca en los **caminos críticos** (seguridad, validación de entrada, errores de negocio y flujos HTTP principales) para garantizar la calidad sin sobredimensionar el mantenimiento.
 
-### CÃ³mo correr los tests
+### Cómo correr los tests
 
 ```bash
-# Todos los tests (unit + integraciÃ³n)
+# Todos los tests (unit + integración)
 pnpm test
 
 # Solo unitarios
 pnpm test:unit
 
-# Solo integraciÃ³n
+# Solo integración
 pnpm test:integration
 
 # Modo watch (desarrollo)
 pnpm test:watch
 
-# Un archivo especÃ­fico
+# Un archivo específico
 pnpm exec vitest run src/__tests__/unit/AuthService.unit.test.ts
 ```
 
 ---
 
-## ðŸš€ Puesta en Marcha con Docker y Docker Compose
+## 🚀 Puesta en Marcha con Docker y Docker Compose
 
-La forma mÃ¡s rÃ¡pida y recomendada es utilizar Docker Compose:
+La forma más rápida y recomendada es utilizar Docker Compose:
 
 ```bash
-# Desde la raÃ­z del repositorio o dentro de backend/
+# Desde la raíz del repositorio o dentro de backend/
 docker compose up --build
 ```
 
-Esto levantarÃ¡ automÃ¡ticamente:
+Esto levantará automáticamente:
 1. **PostgreSQL 16**: En el puerto `5432` con volumen persistente `fixer_postgres_volume`.
-2. **Fixer Backend API**: En el puerto `3000`, esperando que la base de datos estÃ© lista para sincronizar modelos y ejecutar los seeders con los datos del maquetado (Carlos Mendoza, reseÃ±as y clientes).
+2. **Fixer Backend API**: En el puerto `3000`, esperando que la base de datos esté lista para sincronizar modelos y ejecutar los seeders con los datos del maquetado (Carlos Mendoza, reseñas y clientes).
 
-VerificaciÃ³n de salud:
+Verificación de salud:
 ```bash
 curl http://localhost:3000/api/v1/health
 ```
 
 ---
 
-## ðŸ’» EjecuciÃ³n en Desarrollo Local (sin Docker)
+## 💻 Ejecución en Desarrollo Local (sin Docker)
 
 ### Requisitos previos
 - Node.js v20+ o v22+
-- Servidor PostgreSQL en ejecuciÃ³n (por defecto `localhost:5432`, BD `fixer_db`)
+- Servidor PostgreSQL en ejecución (por defecto `localhost:5432`, BD `fixer_db`)
 
 ### Pasos
 1. Instalar dependencias:
@@ -146,13 +147,13 @@ curl http://localhost:3000/api/v1/health
 2. Configurar variables de entorno:
    ```bash
    cp .env.example .env
-   # Editar credenciales de base de datos en .env segÃºn tu PostgreSQL local
+   # Editar credenciales de base de datos en .env según tu PostgreSQL local
    ```
 3. Ejecutar en modo desarrollo con recarga en vivo:
    ```bash
    npm run dev
    ```
-4. Compilar para producciÃ³n:
+4. Compilar para producción:
    ```bash
    npm run build
    npm start
@@ -160,51 +161,47 @@ curl http://localhost:3000/api/v1/health
 
 ---
 
-## ðŸ”‘ Usuarios de Prueba Precargados (Database Seeder)
+## 🔑 Usuarios de Prueba Precargados (Database Seeder)
 
-| Rol | Nombre | Correo | ContraseÃ±a | Detalle / Pregunta Secreta |
+| Rol | Nombre | Correo | Contraseña | Detalle / Pregunta Secreta |
 | :--- | :--- | :--- | :--- | :--- |
-| **Profesional** | Carlos Mendoza | `carlos.mendoza@fixerservices.com` | `Password123!` | MatrÃ­cula 48.912, PlomerÃ­a & Gas. Pregunta: *Â¿CuÃ¡l fue el nombre de tu primer taller o maestro de oficio?* Respuesta: *Taller Don Anselmo* |
-| **Profesional** | Roberto GÃ³mez | `roberto.gomez@fixerservices.com` | `Password123!` | Electricista Matriculado COPIME |
-| **Profesional** | Mariana VÃ¡zquez | `mariana.vazquez@fixerservices.com` | `Password123!` | Pintura & Acabados |
-| **Cliente** | Javier Rossi | `javier.rossi@ejemplo.com` | `Password123!` | Cliente verificado con reseÃ±a |
-| **Cliente** | Martina GÃ³mez | `martina@ejemplo.com` | `Password123!` | Cliente de prueba para nuevas contrataciones |
+| **Profesional** | Carlos Mendoza | `carlos.mendoza@fixerservices.com` | `Password123!` | Matrícula 48.912, Plomería & Gas. Pregunta: *¿Cuál fue el nombre de tu primer taller o maestro de oficio?* Respuesta: *Taller Don Anselmo* |
+| **Profesional** | Roberto Gómez | `roberto.gomez@fixerservices.com` | `Password123!` | Electricista Matriculado COPIME |
+| **Profesional** | Mariana Vázquez | `mariana.vazquez@fixerservices.com` | `Password123!` | Pintura & Acabados |
+| **Cliente** | Javier Rossi | `javier.rossi@ejemplo.com` | `Password123!` | Cliente verificado con reseña |
+| **Cliente** | Florencia Benítez | `florencia.benitez@ejemplo.com` | `Password123!` | Cliente con reseña |
+| **Cliente** | Gonzalo Morales | `gonzalo.morales@ejemplo.com` | `Password123!` | Cliente con reseña |
+| **Cliente** | Martina Gómez | `martina@ejemplo.com` | `Password123!` | Cliente de prueba para nuevas contrataciones |
 
 ---
-## ðŸ“– DocumentaciÃ³n interactiva de la API (Swagger)
 
-La API cuenta con documentaciÃ³n interactiva bajo el estÃ¡ndar OpenAPI 3.0,
-implementada mediante `swagger-jsdoc` y `swagger-ui-express`.
+## 📖 Documentación interactiva de la API (Swagger)
 
-Una vez iniciado el backend, tanto de forma local como mediante Docker,
-la documentaciÃ³n estÃ¡ disponible en:
+La API cuenta con documentación interactiva bajo el estándar OpenAPI 3.0, implementada mediante `swagger-jsdoc` y `swagger-ui-express`.
+
+Una vez iniciado el backend, tanto de forma local como mediante Docker, la documentación está disponible en:
 
 http://localhost:3000/api-docs
 
 ### Funcionalidades
 
-- DocumentaciÃ³n de los 18 endpoints de la API.
-- VisualizaciÃ³n de parÃ¡metros y cuerpos de las peticiones.
-- CÃ³digos de respuesta HTTP.
-- EjecuciÃ³n de peticiones desde el navegador mediante Try it out.
-- AutenticaciÃ³n JWT para endpoints protegidos.
+- Documentación de los 18 endpoints de la API.
+- Visualización de parámetros y cuerpos de las peticiones.
+- Códigos de respuesta HTTP.
+- Ejecución de peticiones desde el navegador mediante Try it out.
+- Autenticación JWT para endpoints protegidos.
 
-### AutenticaciÃ³n desde Swagger
+### Autenticación desde Swagger
 
 1. Ejecutar `POST /auth/login` con las credenciales de un usuario registrado.
 2. Copiar el token JWT retornado en `data.token`.
-3. Presionar el botÃ³n **Authorize**.
+3. Presionar el botón **Authorize**.
 4. Pegar el token sin el prefijo `Bearer`.
 5. Ejecutar los endpoints protegidos.
 
 ### Mantenimiento
 
-La configuraciÃ³n centralizada se encuentra en `src/config/SwaggerConfig.ts`.
-La documentaciÃ³n de los endpoints se define mediante anotaciones JSDoc
-en los routers de cada mÃ³dulo, a excepciÃ³n del endpoint Health,
-documentado en `app.ts`.
+La configuración centralizada se encuentra en `src/config/SwaggerConfig.ts`.
+La documentación de los endpoints se define mediante anotaciones JSDoc en los routers de cada módulo, a excepción del endpoint Health, documentado en `app.ts`.
 
-Al agregar o modificar un endpoint, se debe actualizar su documentaciÃ³n
-correspondiente.
-
----
+Al agregar o modificar un endpoint, se debe actualizar su documentación correspondiente.
