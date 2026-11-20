@@ -23,12 +23,13 @@ describe('UserController - Tests unitarios', () => {
     res = { status: vi.fn().mockReturnThis(), json: vi.fn().mockReturnThis() };
   });
 
+// Devuelve error porque no existe el usuario
   describe('getMyProfile', () => {
     it('lanza UnauthorizedError si no hay usuario', async () => {
       const req = buildRequest({ user: undefined });
       await expect(controller.getMyProfile(req, res as unknown as Response)).rejects.toBeInstanceOf(UnauthorizedError);
     });
-
+// Devuelve el perfil con formato { success, data }
     it('devuelve el perfil con formato { success, data }', async () => {
       await controller.getMyProfile(buildRequest(), res as unknown as Response);
       expect(res.status).toHaveBeenCalledWith(200);
